@@ -1,0 +1,14 @@
+{
+  "name": "canteen-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://foo.bar",
+  "author": "Manuel Blanquett",
+  "license": "MIT",
+  "scripts": {
+    "start": "node service.js"
+  },
+  "dependencies": {
+    "slackbots": "^1.0.2"
+  }
+}
