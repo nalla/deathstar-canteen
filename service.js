@@ -1,47 +1,37 @@
-var SlackBot = require('slackbots');
-var config = require('./config');
-var bot = new SlackBot({
-    token: config.token,
-    name: config.name
-});
-var id = null;
+'use strict';
 
-bot.on('start', function(data) {
+const SlackBot = require('slackbots');
+const CommandHandlerFactory = require('./lib/command-handler-factory');
+const Config = require('./config');
+
+const bot = new SlackBot({
+  token: Config.token,
+  name: Config.name
+});
+let id = null;
+
+bot.on('start', function (data) {
   bot.getUser(bot.name).then(user => {
     id = user.id;
   });
 });
 
-bot.on('message', function(data) {
-  var params = {
-    icon_emoji: config.emoji
+bot.on('message', function (data) {
+  const params = {
+    icon_emoji: Config.emoji
   };
-  var regex = new RegExp('\\<\\@' + id + '\\>\\s(\\w+)\\s?(.*)');
-  if(data.channel && data.text)
-  {
-    var match = data.text.match(regex);
-    if(match)
-    {
-      var commandName = match[1].toLowerCase();
-      var commandData = match[2];
-      switch(commandName)
-      {
-        case 'hi':
-          bot.postMessage(data.channel, 'Hi to you too!', params);
-          break;
-        
-        case 'help':
-          if(!commandData)
-            bot.postMessage(data.channel, 'The following commands are available:\n*hi*\n*help*', params);
-          else
-            bot.postMessage(data.channel, commandData, params);
-         break;
-
-        default:
-          bot.postMessage(data.channel, 'I don\'t understand a word you saying.', params);
-          break;
+  const regex = new RegExp(`\\<\\@${id}\\>\\s(\\w+)\\s?(.*)`);
+  if (data.channel && data.text) {
+    const match = data.text.match(regex);
+    if (match) {
+      const commandName = match[1].toLowerCase();
+      const commandData = match[2];
+      const commandHandler = CommandHandlerFactory.getHandler(commandName, commandData);
+      if (commandHandler) {
+        commandHandler.handle().then( response => {
+          bot.postMessage(data.channel, response, params);
+        });
       }
     }
   }
 });
-
