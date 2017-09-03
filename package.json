@@ -6,9 +6,14 @@
   "author": "Manuel Blanquett",
   "license": "MIT",
   "scripts": {
-    "start": "node service.js"
+    "start": "node service.js",
+    "test": "mocha"
   },
   "dependencies": {
     "slackbots": "^1.0.2"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^3.5.0"
   }
 }
