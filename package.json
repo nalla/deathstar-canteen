@@ -10,6 +10,8 @@
     "test": "mocha"
   },
   "dependencies": {
+    "moment": "^2.18.1",
+    "mongoose": "^4.11.10",
     "slackbots": "^1.0.2"
   },
   "devDependencies": {

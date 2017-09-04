@@ -3,6 +3,10 @@
 const SlackBot = require('slackbots');
 const CommandHandlerFactory = require('./lib/command-handler-factory');
 const Config = require('./config');
+const MongoConnect = require('./data/mongo-connect');
+
+MongoConnect.initialize(() => {
+});
 
 const bot = new SlackBot({
   token: Config.token,
@@ -28,7 +32,7 @@ bot.on('message', function (data) {
       const commandData = match[2];
       const commandHandler = CommandHandlerFactory.getHandler(commandName, commandData);
       if (commandHandler) {
-        commandHandler.handle().then( response => {
+        commandHandler.handle().then(response => {
           bot.postMessage(data.channel, response, params);
         });
       }
