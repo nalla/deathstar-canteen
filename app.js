@@ -1,7 +1,7 @@
 'use strict';
 
 const SlackBot = require('slackbots');
-const CommandHandlerFactory = require('./lib/command-handler-factory');
+const CommandFactory = require('./lib/command-factory');
 const Config = require('./config');
 const MongoConnect = require('./data/mongo-connect');
 
@@ -30,9 +30,9 @@ bot.on('message', function (data) {
     if (match) {
       const commandName = match[1].toLowerCase();
       const commandData = match[2];
-      const commandHandler = CommandHandlerFactory.getHandler(commandName, commandData);
-      if (commandHandler) {
-        commandHandler.handle().then(response => {
+      const command = CommandFactory.getCommand(commandName, commandData);
+      if (command) {
+        command.handle().then(response => {
           bot.postMessage(data.channel, response, params);
         });
       }

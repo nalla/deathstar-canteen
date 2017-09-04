@@ -2,18 +2,18 @@
 
 const assert = require('chai').assert;
 
-const HiCommandHandler = require('../lib/handlers/hi-command-handler');
+const HiCommand = require('../lib/commands/hi-command');
 
-describe('HiCommandHandler', () => {
+describe('HiCommand', () => {
   describe('#handle()', () => {
     it('should return response when the command data is null', () => {
-      return new HiCommandHandler(null).handle().then(response => {
+      return new HiCommand(null).handle().then(response => {
         assert.equal(response, 'Hi to you too!');
       });
 
     });
     it('should return response when command data is not null', () => {
-      return new HiCommandHandler('something').handle().then(response => {
+      return new HiCommand('something').handle().then(response => {
         assert.equal(response, 'Hi to you too!');
       });
     });

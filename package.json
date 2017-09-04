@@ -1,12 +1,12 @@
 {
   "name": "canteen-bot",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "repository": "https://foo.bar",
   "author": "Manuel Blanquett",
   "license": "MIT",
   "scripts": {
-    "start": "node service.js",
+    "start": "node app.js",
     "test": "mocha"
   },
   "dependencies": {
