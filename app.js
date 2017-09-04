@@ -5,8 +5,7 @@ const CommandFactory = require('./lib/command-factory');
 const Config = require('./config');
 const MongoConnect = require('./data/mongo-connect');
 
-MongoConnect.initialize(() => {
-});
+MongoConnect.initialize();
 
 const bot = new SlackBot({
   token: Config.token,
@@ -14,13 +13,12 @@ const bot = new SlackBot({
 });
 let id = null;
 
-bot.on('start', function (data) {
-  bot.getUser(bot.name).then(user => {
-    id = user.id;
-  });
+bot.on('start', async (data) => {
+  const user = await bot.getUser(bot.name);
+  id = user.id;
 });
 
-bot.on('message', function (data) {
+bot.on('message', async (data) => {
   const params = {
     icon_emoji: Config.emoji
   };
@@ -32,9 +30,8 @@ bot.on('message', function (data) {
       const commandData = match[2];
       const command = CommandFactory.getCommand(commandName, commandData);
       if (command) {
-        command.handle().then(response => {
-          bot.postMessage(data.channel, response, params);
-        });
+        const response = await command.handle();
+        bot.postMessage(data.channel, response, params);
       }
     }
   }

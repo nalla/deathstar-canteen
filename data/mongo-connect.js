@@ -5,16 +5,12 @@ const mongoose = require('mongoose');
 const Config = require('../config');
 
 class MongoConnect {
-  static initialize(callback) {
+  static initialize() {
     if(mongoose.connection.db) {
-      callback();
       return;
     }
-
+    mongoose.Promise = global.Promise;
     mongoose.connect(Config.mongo, {useMongoClient: true});
-    mongoose.connection.once('open', () => {
-      callback();
-    });
   }
 }
 
