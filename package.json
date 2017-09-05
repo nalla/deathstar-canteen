@@ -1,13 +1,13 @@
 {
   "name": "canteen-bot",
   "version": "1.0.0",
-  "main": "app.js",
-  "repository": "https://foo.bar",
+  "main": "src/App.js",
+  "repository": "https://github.com/nalla/deathstar-canteen",
   "author": "Manuel Blanquett",
   "license": "MIT",
   "scripts": {
-    "start": "node app.js",
-    "test": "mocha"
+    "start": "node src/App.js",
+    "test": "eslint src/**/*.js && mocha src/**/*.spec.js"
   },
   "dependencies": {
     "moment": "^2.18.1",
@@ -16,6 +16,9 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "eslint": "^4.6.1",
+    "eslint-config-airbnb-base": "^12.0.0",
+    "eslint-plugin-import": "^2.7.0",
     "mocha": "^3.5.0"
   }
 }

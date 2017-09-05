@@ -1,10 +1,8 @@
-'use strict';
-
-const BaseCommand = require('./base-command');
+const BaseCommand = require('./BaseCommand');
 
 class HiCommand extends BaseCommand {
   handle() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve('Hi to you too!');
     });
   }
