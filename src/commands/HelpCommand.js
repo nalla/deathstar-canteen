@@ -14,9 +14,11 @@ class HelpCommand extends BaseCommand {
 
   getGeneralHelpMessage() {
     let message = 'The following commands are available:\n';
+
     this.supportedCommands.forEach((command) => {
       message += `  *${command}*\n`;
     });
+
     message += 'Use *help command* for more information about each command.';
     return message;
   }
