@@ -13,7 +13,7 @@ describe('TomorrowCommand', () => {
   describe('#handle()', () => {
     it('should return tomorrow\'s menu', async () => {
       await Menu.create({ date: moment().add(1, 'days').format('YYYYMMDD'), meals: ['Foo', 'Bar'] });
-      const expected = `Tomorrow is the *${moment().add(1, 'days').format('DD.MM.YYYY')}* and the meals are:\n  Foo\n  Bar\n`;
+      const expected = `Tomorrow is the *${moment().add(1, 'days').format('DD.MM.YYYY')}* and the meals are:\n1. Foo\n2. Bar\n`;
       const response = await new TomorrowCommand(null).handle();
       chai.assert.equal(response, expected);
     });

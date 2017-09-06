@@ -1,9 +1,18 @@
 const mongoose = require('mongoose');
 
-const menuSchema = mongoose.Schema({
-  date: String,
+const MenuSchema = mongoose.Schema({
+  date: { type: String, unique: true },
   meals: [String],
 });
-const Menu = mongoose.model('Menu', menuSchema);
+MenuSchema.methods.print = function print() {
+  let i = 0;
+  let result = '';
+  this.meals.forEach((meal) => {
+    i += 1;
+    result += `${i}. ${meal}\n`;
+  });
+  return result;
+};
+const Menu = mongoose.model('Menu', MenuSchema);
 
 module.exports = Menu;
