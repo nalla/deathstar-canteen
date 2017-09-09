@@ -6,7 +6,8 @@ require('./MongoConnection');
 class App {
   constructor() {
     this.getBot();
-    this.getId();
+    this.getRegex();
+    this.getParams();
     this.startBot();
   }
 
@@ -17,23 +18,25 @@ class App {
     });
   }
 
-  getId() {
+  getRegex() {
     this.bot.on('start', async () => {
       const user = await this.bot.getUser(this.bot.name);
+      this.regex = new RegExp(`\\<\\@${user.id}\\>\\s(\\w+)\\s?(.*)`);
 
-      this.id = user.id;
     });
+  }
+
+  getParams() {
+    this.params = {
+      icon_emoji: Config.emoji,
+    };
   }
 
   startBot() {
     this.bot.on('message', async (data) => {
-      const params = {
-        icon_emoji: Config.emoji,
-      };
-      const regex = new RegExp(`\\<\\@${this.id}\\>\\s(\\w+)\\s?(.*)`);
-
+      console.log('Parsing..');
       if (data.channel && data.text) {
-        const match = data.text.match(regex);
+        const match = data.text.match(this.regex);
 
         if (match) {
           const commandName = match[1].toLowerCase();
@@ -41,10 +44,13 @@ class App {
           const command = CommandFactory.getCommand(commandName, commandData);
 
           if (command) {
+            console.log(`Received: ${commandName} ${commandData}`);
             const response = await command.handle();
 
-            this.bot.postMessage(data.channel, response, params);
+            this.bot.postMessage(data.channel, response, this.params);
           }
+
+          console.log('Done.');
         }
       }
     });
