@@ -3,7 +3,7 @@ const BaseCommand = require('./BaseCommand');
 class HelpCommand extends BaseCommand {
   constructor(commandData) {
     super(commandData);
-    this.supportedCommands = ['hi', 'help', 'today', 'tomorrow', 'add', 'clear'];
+    this.supportedCommands = ['hi', 'help', 'today', 'tomorrow', 'dayaftertomorrow', 'add', 'clear'];
   }
 
   handle() {
@@ -33,6 +33,8 @@ class HelpCommand extends BaseCommand {
         return 'The *today* command will return a list of today\'s meals.';
       case 'tomorrow':
         return 'The *tomorrow* command will return a list of tomorrow\'s meals.';
+      case 'dayaftertomorrow':
+        return 'The *dayaftertomorrow* command will return a list of the day after tomorrow\'s meals.';
       case 'add':
         return 'The *add* command can be used to add something to the menu.\n\nExample: `add 01012017 Foobar`';
       case 'clear':
