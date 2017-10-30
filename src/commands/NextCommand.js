@@ -19,7 +19,7 @@ class NextCommand extends BaseCommand {
     let response = '';
 
     menus.forEach((menu) => {
-      response += `On *${moment(menu.date).format('DD.MM.YYYY')}* the meals are:\n${menu.print()}`;
+      response += `On *${moment(menu.date).format('DD.MM.YYYY')}* the meals are:\n${menu.print()}\n`;
     });
 
     return response;

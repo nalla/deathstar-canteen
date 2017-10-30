@@ -46,7 +46,7 @@ class App {
             console.log(`Received: ${commandName} ${commandData}`);
             const response = await command.handle();
 
-            this.bot.postMessage(data.channel, response, this.params);
+            this.bot.postMessage(data.channel, response.trim(), this.params);
           }
 
           console.log('Done.');

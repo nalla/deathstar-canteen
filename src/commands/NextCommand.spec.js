@@ -19,7 +19,7 @@ describe('NextCommand', () => {
       const response = await new NextCommand('1').handle();
 
       // Assert
-      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n`);
+      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n\n`);
     });
 
     it('should display today\'s and tomorrow\'s menu using 2 as parameter', async () => {
@@ -31,8 +31,8 @@ describe('NextCommand', () => {
       const response = await new NextCommand('2').handle();
 
       // Assert
-      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n` +
-        `On *${moment().add(1, 'days').format('DD.MM.YYYY')}* the meals are:\n1. Raboof\n`);
+      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n\n` +
+        `On *${moment().add(1, 'days').format('DD.MM.YYYY')}* the meals are:\n1. Raboof\n\n`);
     });
 
     it('should only display menus in queried range', async () => {
@@ -44,7 +44,7 @@ describe('NextCommand', () => {
       const response = await new NextCommand('1').handle();
 
       // Assert
-      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n`);
+      chai.assert.equal(response, `On *${moment().format('DD.MM.YYYY')}* the meals are:\n1. Foobar\n\n`);
     });
 
     it('should return notice about missing command data', async () => {
