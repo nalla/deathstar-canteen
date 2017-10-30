@@ -3,6 +3,7 @@ const HelpCommand = require('./commands/HelpCommand');
 const TodayCommand = require('./commands/TodayCommand');
 const TomorrowCommand = require('./commands/TomorrowCommand');
 const DayAfterTomorrowCommand = require('./commands/DayAfterTomorrowCommand');
+const NextCommand = require('./commands/NextCommand');
 const AddCommand = require('./commands/AddCommand');
 const ClearCommand = require('./commands/ClearCommand');
 
@@ -19,6 +20,8 @@ class CommandFactory {
         return new TomorrowCommand(commandData);
       case 'dayaftertomorrow':
         return new DayAfterTomorrowCommand(commandData);
+      case 'next':
+        return new NextCommand(commandData);
       case 'add':
         return new AddCommand(commandData);
       case 'clear':

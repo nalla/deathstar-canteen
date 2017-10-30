@@ -22,7 +22,6 @@ class App {
     this.bot.on('start', async () => {
       const user = await this.bot.getUser(this.bot.name);
       this.regex = new RegExp(`\\<\\@${user.id}\\>\\s(\\w+)\\s?(.*)`);
-
     });
   }
 
