@@ -1,12 +1,8 @@
-language: node_js
-node_js:
-  - "node"
+language: csharp
+dotnet: 2.0.0
 services:
   - mongodb
-cache: yarn
 before_script:
   - sleep 15
-  - mongo canteen --eval 'db.createUser({user:"test",pwd:"test",roles:[{role:"readWrite",db:"canteen"}]});'
-  - echo '{"mongo":"mongodb://test:test@localhost/canteen"}' > ./config.json
 script:
-  - yarn run test
+  - ./build.sh
