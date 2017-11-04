@@ -1,10 +1,14 @@
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
 
-Task("Build")
+Task("Publish")
+  .IsDependentOn("Test")
   .Does(() =>
 {
-  DotNetCoreBuild("./src/Deathstar.Canteen/Deathstar.Canteen.csproj");
+  DotNetCorePublish("./src/Deathstar.Canteen/Deathstar.Canteen.csproj", new DotNetCorePublishSettings
+  {
+    Configuration = configuration
+  });
 });
 
 Task("Test")
