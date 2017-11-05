@@ -20,7 +20,7 @@ namespace Deathstar.Canteen.Tests.Units
 		[InlineData( "01.01.2017 " )]
 		[InlineData( "abc" )]
 		[InlineData( " abc" )]
-		public void TheHandleMethoudShouldExpectValidInput( string arguments )
+		public void TheHandleMethodShouldExpectValidInput( string arguments )
 		{
 			// Arrange
 			var command = new AddCommand( arguments, MongoHelper.Client );

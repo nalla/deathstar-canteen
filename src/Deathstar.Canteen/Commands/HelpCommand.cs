@@ -16,7 +16,8 @@ namespace Deathstar.Canteen.Commands
 			"dayaftertomorrow",
 			"next",
 			"add",
-			"clear"
+			"clear",
+			"import"
 		};
 
 		public HelpCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
@@ -59,6 +60,12 @@ namespace Deathstar.Canteen.Commands
 						+ Environment.NewLine
 						+ Environment.NewLine
 						+ "Example: `clear 01012017";
+
+				case "import":
+					return "The *import* command can be used to import a json based list of menus."
+						+ Environment.NewLine
+						+ Environment.NewLine
+						+ "Example: `import https://some.url/endpoint`";
 
 				default:
 					return GetGeneralHelpMessage();

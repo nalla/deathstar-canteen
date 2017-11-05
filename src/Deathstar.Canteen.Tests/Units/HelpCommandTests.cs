@@ -76,6 +76,21 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public void TheHandleMethodWithImportCommandNameShouldReturnDetailedHelpMessage()
+		{
+			// Arrange
+			var command = new HelpCommand( "import", MongoHelper.Client );
+
+			// Act
+			string response = command.Handle();
+
+			// Assert
+			Assert.Equal(
+				$"The *import* command can be used to import a json based list of menus.{Environment.NewLine}{Environment.NewLine}Example: `import https://some.url/endpoint`",
+				response );
+		}
+
+		[Fact]
 		public void TheHandleMethodWithNextCommandNameShouldReturnDetailedHelpMessage()
 		{
 			// Arrange
@@ -100,6 +115,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *next*{Environment.NewLine}"
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
+				+ $"  *import*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
 			var command = new HelpCommand( null, MongoHelper.Client );
@@ -149,6 +165,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *next*{Environment.NewLine}"
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
+				+ $"  *import*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
 			var command = new HelpCommand( "unkwnown", MongoHelper.Client );

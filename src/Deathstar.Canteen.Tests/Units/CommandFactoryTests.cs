@@ -50,6 +50,19 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public void TheCommandFactoryShouldConstrucImportCommandWhenImportCommandNameIsProvided()
+		{
+			// Arrange
+			var factory = new CommandFactory( MongoHelper.Client );
+
+			// Act
+			ICommand command = factory.GetCommand( new CommandRequest( "import" ) );
+
+			// Assert
+			Assert.IsType<ImportCommand>( command );
+		}
+
+		[Fact]
 		public void TheCommandFactoryShouldConstrucNextCommandWhenNextCommandNameIsProvided()
 		{
 			// Arrange

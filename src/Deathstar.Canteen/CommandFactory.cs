@@ -38,6 +38,9 @@ namespace Deathstar.Canteen
 				case "clear":
 					return new ClearCommand( commandRequest.Arguments, MongoClient );
 
+				case "import":
+					return new ImportCommand( commandRequest.Arguments, MongoClient );
+
 				default:
 					return null;
 			}
