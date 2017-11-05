@@ -6,10 +6,30 @@ namespace Deathstar.Canteen.Tests.Units
 	public class CommandRequestParserTests
 	{
 		[Fact]
-		public void TheParseMethodShouldIgnoreInvalidInput()
+		public void TheParseMethodShouldOptionallyIgnoreMessagePrefixIfUsernameIsMentioned()
 		{
 			// Arrange
 			var commandRequestParser = new CommandRequestParser( "foobar" );
+			var message = new OnMessageArgs
+			{
+				MentionedUsers = new[] { "foobar" },
+				Text = "help"
+			};
+
+			// Act
+			CommandRequest commandRequest = commandRequestParser.Parse( message );
+
+			// Assert
+			Assert.NotNull( commandRequest );
+			Assert.Equal( "help", commandRequest.Name );
+			Assert.Equal( "", commandRequest.Arguments );
+		}
+
+		[Fact]
+		public void TheParseMethodShouldNotIgnoreMessagePrefixIfUsernameIsNotMentioned()
+		{
+			// Arrange
+			var commandRequestParser = new CommandRequestParser( "barfoo" );
 			var message = new OnMessageArgs
 			{
 				MentionedUsers = new[] { "foobar" },

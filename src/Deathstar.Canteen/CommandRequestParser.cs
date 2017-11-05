@@ -5,7 +5,7 @@ using Slackbot;
 namespace Deathstar.Canteen {
 	public class CommandRequestParser
 	{
-		private Regex Regex { get; } = new Regex( "<@[A-Z0-9]+>\\s(\\w+)\\s?(.*)", RegexOptions.Compiled );
+		private Regex Regex { get; } = new Regex( "(?:<@[A-Z0-9]+>\\s|)(\\w+)\\s?(.*)", RegexOptions.Compiled );
 
 		private string Username { get; }
 
