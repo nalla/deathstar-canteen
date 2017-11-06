@@ -16,7 +16,9 @@ namespace Deathstar.Canteen.Commands
 
 		public override string Handle()
 		{
-			var url = new Url( Arguments ?? "" );
+			Log( $"Trying to import from url {Arguments}" );
+
+			var url = new Url( ( Arguments ?? "" ).TrimStart( '<' ).TrimEnd( '>' ) );
 
 			if( !url.IsValid() )
 				return "You need to provide a well formed url.";

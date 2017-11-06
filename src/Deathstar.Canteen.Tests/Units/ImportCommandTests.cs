@@ -122,6 +122,32 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public void TheHandleMethodShouldAcceptWellFormedUrlsFromSlack()
+		{
+			using( var httpTest = new HttpTest() )
+			{
+				// Arrange
+				var importData = new[]
+				{
+					new { date = "20010101", meals = new[] { "foo", "bar" } }
+				};
+				var command = new ImportCommand( "<https://api.myjson.com/bins/1dekrb>", MongoHelper.Client );
+				httpTest.RespondWithJson( importData );
+
+				// Act
+				string response = command.Handle();
+
+				// Assert
+				httpTest.ShouldHaveCalled( "https://api.myjson.com/bins/1dekrb" );
+				Assert.Equal( "I imported 1 menus.", response );
+				Menu menu = MongoHelper.Collection.Find( x => x.Date == "20010101" ).Single();
+				Assert.Contains( "foo", menu.Meals );
+				Assert.Contains( "bar", menu.Meals );
+				Assert.Equal( 2, menu.Meals.Length );
+			}
+		}
+
+		[Fact]
 		public void TheHandleMethodShouldInsertMenuOnlyOnceIntoDatabase()
 		{
 			using( var httpTest = new HttpTest() )
