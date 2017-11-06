@@ -46,7 +46,7 @@ namespace Deathstar.Canteen.Tests.Units
 			string response = command.Handle();
 
 			// Assert
-			Assert.Equal( $"The *clear* command can be used to clear the menu on a given date.{Environment.NewLine}{Environment.NewLine}Example: `clear 01012017", response );
+			Assert.Equal( $"The *clear* command can be used to clear the menu on a given date.{Environment.NewLine}{Environment.NewLine}Example: `clear 01012017`", response );
 		}
 
 		[Fact]
@@ -100,7 +100,7 @@ namespace Deathstar.Canteen.Tests.Units
 			string response = command.Handle();
 
 			// Assert
-			Assert.Equal( $"The *next* command will return a list of menus of the next days.{Environment.NewLine}{Environment.NewLine}Example: `next 5", response );
+			Assert.Equal( $"The *next* command will return a list of menus of the next days.{Environment.NewLine}{Environment.NewLine}Example: `next 5`", response );
 		}
 
 		[Fact]

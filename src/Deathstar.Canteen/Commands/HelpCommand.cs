@@ -47,7 +47,7 @@ namespace Deathstar.Canteen.Commands
 					return "The *next* command will return a list of menus of the next days."
 						+ Environment.NewLine
 						+ Environment.NewLine
-						+ "Example: `next 5";
+						+ "Example: `next 5`";
 
 				case "add":
 					return "The *add* command can be used to add something to the menu."
@@ -59,7 +59,7 @@ namespace Deathstar.Canteen.Commands
 					return "The *clear* command can be used to clear the menu on a given date."
 						+ Environment.NewLine
 						+ Environment.NewLine
-						+ "Example: `clear 01012017";
+						+ "Example: `clear 01012017`";
 
 				case "import":
 					return "The *import* command can be used to import a json based list of menus."
