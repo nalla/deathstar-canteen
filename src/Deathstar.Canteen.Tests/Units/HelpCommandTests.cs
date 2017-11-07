@@ -116,6 +116,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
 				+ $"  *import*{Environment.NewLine}"
+				+ $"  *stats*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
 			var command = new HelpCommand( null, MongoHelper.Client );
@@ -125,6 +126,19 @@ namespace Deathstar.Canteen.Tests.Units
 
 			// Assert
 			Assert.Equal( generalHelpText, response );
+		}
+
+		[Fact]
+		public void TheHandleMethodWithStatsCommandNameShouldReturnDetailedHelpMessage()
+		{
+			// Arrange
+			var command = new HelpCommand( "stats", MongoHelper.Client );
+
+			// Act
+			string response = command.Handle();
+
+			// Assert
+			Assert.Equal( "The *stats* command will display internal statistics of the canteen.", response );
 		}
 
 		[Fact]
@@ -166,6 +180,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
 				+ $"  *import*{Environment.NewLine}"
+				+ $"  *stats*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
 			var command = new HelpCommand( "unkwnown", MongoHelper.Client );

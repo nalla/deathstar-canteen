@@ -17,7 +17,8 @@ namespace Deathstar.Canteen.Commands
 			"next",
 			"add",
 			"clear",
-			"import"
+			"import",
+			"stats"
 		};
 
 		public HelpCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
@@ -66,6 +67,9 @@ namespace Deathstar.Canteen.Commands
 						+ Environment.NewLine
 						+ Environment.NewLine
 						+ "Example: `import https://some.url/endpoint`";
+
+				case "stats":
+					return "The *stats* command will display internal statistics of the canteen.";
 
 				default:
 					return GetGeneralHelpMessage();

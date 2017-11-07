@@ -128,6 +128,19 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public void TheCommandFactoryShouldConstructStatsCommandWhenStatsCommandNameIsProvided()
+		{
+			// Arrange
+			var factory = new CommandFactory( MongoHelper.Client );
+
+			// Act
+			ICommand command = factory.GetCommand( new CommandRequest( "stats" ) );
+
+			// Assert
+			Assert.IsType<StatsCommand>( command );
+		}
+
+		[Fact]
 		public void TheCommandFactoryShouldConstructTodayCommandWhenTodayCommandNameIsProvided()
 		{
 			// Arrange

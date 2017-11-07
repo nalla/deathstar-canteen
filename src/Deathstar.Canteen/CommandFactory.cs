@@ -41,6 +41,9 @@ namespace Deathstar.Canteen
 				case "import":
 					return new ImportCommand( commandRequest.Arguments, MongoClient );
 
+				case "stats":
+					return new StatsCommand( commandRequest.Arguments, MongoClient );
+
 				default:
 					return null;
 			}
