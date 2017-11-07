@@ -5,7 +5,8 @@
 !.vscode/extensions.json
 .vs
 
-/tools
+/tools/*
+!/tools/packages.config
 /artifacts
 
 [bB]in
