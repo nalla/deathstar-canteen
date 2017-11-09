@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using MongoDB.Driver;
 
@@ -10,7 +11,7 @@ namespace Deathstar.Canteen.Commands
 	{
 		public StatsCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
 
-		public override string Handle()
+		public override async Task<string> HandleAsync()
 		{
 			var sb = new StringBuilder();
 			Process process = Process.GetCurrentProcess();
@@ -25,7 +26,7 @@ namespace Deathstar.Canteen.Commands
 			sb.AppendLine( $"Uptime: {uptime.Days} days, {uptime.Hours} hours, {uptime.Minutes} minutes, {uptime.Seconds} seconds" );
 			sb.AppendLine();
 			sb.AppendLine( "*Database*" );
-			sb.AppendLine( $"Saved menus: {MongoCollection.Count( _ => true )}" );
+			sb.AppendLine( $"Saved menus: {await MongoCollection.CountAsync( _ => true )}" );
 
 			return sb.ToString();
 		}

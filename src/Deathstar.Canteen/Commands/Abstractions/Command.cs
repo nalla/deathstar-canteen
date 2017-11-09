@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Persistence;
 using MongoDB.Driver;
 
@@ -20,7 +21,7 @@ namespace Deathstar.Canteen.Commands.Abstractions
 
 		protected IMongoCollection<Menu> MongoCollection { get; }
 
-		public abstract string Handle();
+		public abstract Task<string> HandleAsync();
 
 		protected void Log( string message ) => Console.WriteLine( $"{GetType().Name}: {message}" );
 	}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using MongoDB.Driver;
@@ -13,7 +14,7 @@ namespace Deathstar.Canteen.Commands
 
 		public AddCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
 
-		public override string Handle()
+		public override async Task<string> HandleAsync()
 		{
 			Match match = Regex.Match( Arguments ?? string.Empty );
 
@@ -23,7 +24,8 @@ namespace Deathstar.Canteen.Commands
 			string date = $"{match.Groups[3].Value}{match.Groups[2].Value}{match.Groups[1]}";
 			string formattedDate = $"{match.Groups[1].Value}.{match.Groups[2].Value}.{match.Groups[3].Value}";
 			string meal = match.Groups[4].Value;
-			Menu menu = MongoCollection.Find( x => x.Date == date ).SingleOrDefault();
+			IAsyncCursor<Menu> cursor = await MongoCollection.FindAsync( x => x.Date == date );
+			Menu menu = await cursor.SingleOrDefaultAsync();
 
 			if( menu != null )
 			{
@@ -34,7 +36,7 @@ namespace Deathstar.Canteen.Commands
 
 				list.Add( meal );
 				menu.Meals = list.ToArray();
-				MongoCollection.ReplaceOne( x => x.Id == menu.Id, menu );
+				await MongoCollection.ReplaceOneAsync( x => x.Id == menu.Id, menu );
 
 				return $"I added _{meal}_ to the menu on *{formattedDate}*.";
 			}
@@ -44,7 +46,7 @@ namespace Deathstar.Canteen.Commands
 				Date = date,
 				Meals = new[] { meal }
 			};
-			MongoCollection.InsertOne( menu );
+			await MongoCollection.InsertOneAsync( menu );
 
 			return $"I added _{meal}_ to the menu on *{formattedDate}*.";
 		}

@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Flurl;
@@ -14,7 +15,7 @@ namespace Deathstar.Canteen.Commands
 
 		public ImportCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
 
-		public override string Handle()
+		public override async Task<string> HandleAsync()
 		{
 			Log( $"Trying to import from url {Arguments}" );
 
@@ -27,7 +28,7 @@ namespace Deathstar.Canteen.Commands
 
 			try
 			{
-				menus = url.GetJsonAsync<Menu[]>().GetAwaiter().GetResult();
+				menus = await url.GetJsonAsync<Menu[]>();
 			}
 			catch( FlurlHttpException )
 			{
@@ -41,9 +42,9 @@ namespace Deathstar.Canteen.Commands
 				if( Regex.IsMatch( menu.Date ?? "" ) &&
 					menu.Meals?.Length > 0 &&
 					menu.Meals.All( x => !string.IsNullOrWhiteSpace( x ) ) &&
-					MongoCollection.Count( x => x.Date == menu.Date ) == 0 )
+					await MongoCollection.CountAsync( x => x.Date == menu.Date ) == 0 )
 				{
-					MongoCollection.InsertOne( menu );
+					await MongoCollection.InsertOneAsync( menu );
 					i++;
 				}
 			}

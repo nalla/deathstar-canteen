@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Tests.Helpers;
@@ -20,20 +21,20 @@ namespace Deathstar.Canteen.Tests.Units
 		[InlineData( "01.01.2017 " )]
 		[InlineData( "abc" )]
 		[InlineData( " abc" )]
-		public void TheHandleMethodShouldExpectValidInput( string arguments )
+		public async Task TheHandleMethodShouldExpectValidInput( string arguments )
 		{
 			// Arrange
 			var command = new AddCommand( arguments, MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "You need to provide some valid input.", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldAddMealToExistingMenu()
+		public async Task TheHandleMethodShouldAddMealToExistingMenu()
 		{
 			// Arrange
 			var menu = new Menu
@@ -45,7 +46,7 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new AddCommand( $"{DateTime.Today:ddMMyyyy} Bar", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"I added _Bar_ to the menu on *{DateTime.Today:dd.MM.yyyy}*.", response );
@@ -56,13 +57,13 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldAddMealToTodaysMenuUsingTheDotNotation()
+		public async Task TheHandleMethodShouldAddMealToTodaysMenuUsingTheDotNotation()
 		{
 			// Arrange
 			var command = new AddCommand( $"{DateTime.Today:dd.MM.yyyy} Foobar", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"I added _Foobar_ to the menu on *{DateTime.Today:dd.MM.yyyy}*.", response );
@@ -72,13 +73,13 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldAddMealToTodaysMenuUsingTheNoDotNotation()
+		public async Task TheHandleMethodShouldAddMealToTodaysMenuUsingTheNoDotNotation()
 		{
 			// Arrange
 			var command = new AddCommand( $"{DateTime.Today:ddMMyyyy} Foobar", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"I added _Foobar_ to the menu on *{DateTime.Today:dd.MM.yyyy}*.", response );
@@ -88,7 +89,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldNotAddSameMealTwice()
+		public async Task TheHandleMethodShouldNotAddSameMealTwice()
 		{
 			// Arrange
 			var menu = new Menu
@@ -100,7 +101,7 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new AddCommand( $"{DateTime.Today:ddMMyyyy} Foo", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"_Foo_ is already on the menu on *{DateTime.Today:dd.MM.yyyy}*!", response );

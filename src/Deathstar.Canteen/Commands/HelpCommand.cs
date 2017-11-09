@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using MongoDB.Driver;
 
@@ -23,9 +24,9 @@ namespace Deathstar.Canteen.Commands
 
 		public HelpCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
 
-		public override string Handle()
+		public override Task<string> HandleAsync()
 		{
-			return HasArguments ? GetDetailedHelpMessage() : GetGeneralHelpMessage();
+			return Task.Run( () => HasArguments ? GetDetailedHelpMessage() : GetGeneralHelpMessage() );
 		}
 
 		private string GetDetailedHelpMessage()

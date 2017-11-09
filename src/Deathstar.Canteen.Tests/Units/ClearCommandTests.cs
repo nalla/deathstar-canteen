@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Tests.Helpers;
@@ -18,20 +19,20 @@ namespace Deathstar.Canteen.Tests.Units
 		[InlineData( "01.01.201" )]
 		[InlineData( "abc" )]
 		[InlineData( " abc" )]
-		public void TheHandleMethoudShouldExpectValidInput( string arguments )
+		public async Task TheHandleMethoudShouldExpectValidInput( string arguments )
 		{
 			// Arrange
 			var command = new ClearCommand( arguments, MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "You need to provide some valid input.", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldClearExistingMenu()
+		public async Task TheHandleMethodShouldClearExistingMenu()
 		{
 			// Arrange
 			var menu = new Menu
@@ -43,7 +44,7 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new ClearCommand( $"{DateTime.Today:ddMMyyyy}", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"I cleared the menu on *{DateTime.Today:dd.MM.yyyy}*.", response );
@@ -52,13 +53,13 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnNoticeWhenNothingWasCleared()
+		public async Task TheHandleMethodShouldReturnNoticeWhenNothingWasCleared()
 		{
 			// Arrange
 			var command = new ClearCommand( $"{DateTime.Today:dd.MM.yyyy}", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"There is no menu on *{DateTime.Today:dd.MM.yyyy}*!", response );

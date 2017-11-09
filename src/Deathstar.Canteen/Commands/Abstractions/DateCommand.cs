@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Persistence;
 using MongoDB.Driver;
 
@@ -12,9 +13,10 @@ namespace Deathstar.Canteen.Commands.Abstractions
 
 		protected abstract string Description { get; }
 
-		public sealed override string Handle()
+		public sealed override async Task<string> HandleAsync()
 		{
-			Menu menu = MongoCollection.Find( x => x.Date == Date.ToString( "yyyyMMdd" ) ).SingleOrDefault();
+			IAsyncCursor<Menu> cursor = await MongoCollection.FindAsync( x => x.Date == Date.ToString( "yyyyMMdd" ) );
+			Menu menu = await cursor.SingleOrDefaultAsync();
 
 			return menu == null
 				? $"I don't know which meals are being served {Description.ToLower()}!"
