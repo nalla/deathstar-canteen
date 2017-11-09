@@ -45,20 +45,35 @@ namespace Deathstar.Canteen
 			// Registering message handler
 			bot.OnMessage += async ( sender, message ) =>
 			{
-				CommandRequest commandRequest = commandRequestParser.Parse( message );
+				try
+				{
+					CommandRequest commandRequest = commandRequestParser.Parse( message );
 
-				if( commandRequest == null )
-					return;
+					if( commandRequest == null )
+						return;
 
-				ICommand command = commandFactory.GetCommand( commandRequest );
+					ICommand command = commandFactory.GetCommand( commandRequest );
 
-				if( command == null )
-					return;
+					if( command == null )
+						return;
 
-				string response = await command.HandleAsync();
+					string response = await command.HandleAsync();
 
-				if( !string.IsNullOrWhiteSpace( response ) )
-					bot.SendMessage( message.Channel, response );
+					if( !string.IsNullOrWhiteSpace( response ) )
+						bot.SendMessage( message.Channel, response );
+				}
+				catch( AggregateException ae )
+				{
+					ae.Flatten().Handle( e=>
+					{
+						Console.Error.WriteLine( $"Error: {e.Message}" );
+						return true;
+					} );
+				}
+				catch (Exception e)
+				{
+					Console.Error.WriteLine( $"Error: {e.Message}" );
+				}
 			};
 
 			// Wait for Ctrl+C
