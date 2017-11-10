@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using Deathstar.Canteen.Commands.Abstractions;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Slackbot;
@@ -41,21 +42,38 @@ namespace Deathstar.Canteen
 			var commandRequestParser = new CommandRequestParser( username );
 			var commandFactory = new CommandFactory( mongoClient );
 
-			Console.WriteLine( "Opening canteen.." );
-			Console.WriteLine( "Press Ctrl+C to shut down the canteen." );
-
 			// Registering message handler
-			bot.OnMessage += ( sender, message ) =>
+			bot.OnMessage += async ( sender, message ) =>
 			{
-				CommandRequest commandRequest = commandRequestParser.Parse( message );
+				try
+				{
+					CommandRequest commandRequest = commandRequestParser.Parse( message );
 
-				if( commandRequest == null )
-					return;
+					if( commandRequest == null )
+						return;
 
-				string response = commandFactory.GetCommand( commandRequest )?.Handle();
+					ICommand command = commandFactory.GetCommand( commandRequest );
 
-				if( !string.IsNullOrWhiteSpace( response ) )
-					bot.SendMessage( message.Channel, response );
+					if( command == null )
+						return;
+
+					string response = await command.HandleAsync();
+
+					if( !string.IsNullOrWhiteSpace( response ) )
+						bot.SendMessage( message.Channel, response );
+				}
+				catch( AggregateException ae )
+				{
+					ae.Flatten().Handle( e=>
+					{
+						Console.Error.WriteLine( $"Error: {e.Message}" );
+						return true;
+					} );
+				}
+				catch (Exception e)
+				{
+					Console.Error.WriteLine( $"Error: {e.Message}" );
+				}
 			};
 
 			// Wait for Ctrl+C

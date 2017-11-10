@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Tests.Helpers;
@@ -11,7 +12,7 @@ namespace Deathstar.Canteen.Tests.Units
 		public NextCommandTests() => MongoHelper.Clear();
 
 		[Fact]
-		public void TheHandleMethodShouldOnlyReturnQueriedDays()
+		public async Task TheHandleMethodShouldOnlyReturnQueriedDays()
 		{
 			// Arrange
 			MongoHelper.Collection.InsertMany( new[]
@@ -30,79 +31,79 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new NextCommand( "1", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnAMaxiumumOfSevenDays()
+		public async Task TheHandleMethodShouldReturnAMaxiumumOfSevenDays()
 		{
 			// Arrange
 			var command = new NextCommand( "10", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "I don't know which meals are being served the next 7 days!", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnAMinimumOfOneDay()
+		public async Task TheHandleMethodShouldReturnAMinimumOfOneDay()
 		{
 			// Arrange
 			var command = new NextCommand( "0", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "I don't know which meals are being served the next 1 days!", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnNoticeAboutInvalidCommandArguments()
+		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidCommandArguments()
 		{
 			// Arrange
 			var command = new NextCommand( "Foobar", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "You need to provide some valid input.", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnNoticeAboutMissingCommandArguments()
+		public async Task TheHandleMethodShouldReturnNoticeAboutMissingCommandArguments()
 		{
 			// Arrange
 			var command = new NextCommand( null, MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "You need to provide some valid input.", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnNoticeWhenNoDataWasFound()
+		public async Task TheHandleMethodShouldReturnNoticeWhenNoDataWasFound()
 		{
 			// Arrange
 			var command = new NextCommand( "1", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "I don't know which meals are being served the next 1 days!", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnTodaysAndTomorrowsMenu()
+		public async Task TheHandleMethodShouldReturnTodaysAndTomorrowsMenu()
 		{
 			// Arrange
 			MongoHelper.Collection.InsertMany( new[]
@@ -121,7 +122,7 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new NextCommand( "2", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo"
@@ -131,7 +132,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnTodaysMenu()
+		public async Task TheHandleMethodShouldReturnTodaysMenu()
 		{
 			// Arrange
 			MongoHelper.Collection.InsertOne( new Menu
@@ -142,7 +143,7 @@ namespace Deathstar.Canteen.Tests.Units
 			var command = new NextCommand( "1", MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo", response );

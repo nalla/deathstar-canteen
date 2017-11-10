@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Tests.Helpers;
 using Xunit;
@@ -7,13 +8,13 @@ namespace Deathstar.Canteen.Tests.Units
 	public class StatsCommandTests
 	{
 		[Fact]
-		public void TheHandleMethodShouldReturnStats()
+		public async Task TheHandleMethodShouldReturnStats()
 		{
 			// Arrange
 			var command = new StatsCommand( null, MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Contains( "Private Memory", response );

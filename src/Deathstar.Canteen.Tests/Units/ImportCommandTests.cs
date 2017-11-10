@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Tests.Helpers;
@@ -17,20 +18,20 @@ namespace Deathstar.Canteen.Tests.Units
 		[InlineData( "foobar" )]
 		[InlineData( "1234" )]
 		[InlineData( ":/foo/bar" )]
-		public void TheHandleMethodShouldReturnNoticeAboutInvalidUrl( string arguments )
+		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidUrl( string arguments )
 		{
 			// Arrange
 			var command = new ImportCommand( arguments, MongoHelper.Client );
 
 			// Act
-			string response = command.Handle();
+			string response = await command.HandleAsync();
 
 			// Assert
 			Assert.Equal( "You need to provide a well formed url.", response );
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldCheckDateFormat()
+		public async Task TheHandleMethodShouldCheckDateFormat()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -43,7 +44,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -52,7 +53,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldCheckThatMealsAreValid()
+		public async Task TheHandleMethodShouldCheckThatMealsAreValid()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -65,7 +66,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -74,7 +75,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldCheckThatMealsExists()
+		public async Task TheHandleMethodShouldCheckThatMealsExists()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -87,7 +88,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -96,7 +97,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldInsertMenuIntoDatabase()
+		public async Task TheHandleMethodShouldInsertMenuIntoDatabase()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -109,7 +110,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -122,7 +123,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldAcceptWellFormedUrlsFromSlack()
+		public async Task TheHandleMethodShouldAcceptWellFormedUrlsFromSlack()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -135,7 +136,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "https://api.myjson.com/bins/1dekrb" );
@@ -148,7 +149,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldInsertMenuOnlyOnceIntoDatabase()
+		public async Task TheHandleMethodShouldInsertMenuOnlyOnceIntoDatabase()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -162,7 +163,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -175,7 +176,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldInsertMultipleMenusIntoDatabase()
+		public async Task TheHandleMethodShouldInsertMultipleMenusIntoDatabase()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -189,7 +190,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWithJson( importData );
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
@@ -206,7 +207,7 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
-		public void TheHandleMethodShouldReturnNoticeAboutDownloadError()
+		public async Task TheHandleMethodShouldReturnNoticeAboutDownloadError()
 		{
 			using( var httpTest = new HttpTest() )
 			{
@@ -215,7 +216,7 @@ namespace Deathstar.Canteen.Tests.Units
 				httpTest.RespondWith();
 
 				// Act
-				string response = command.Handle();
+				string response = await command.HandleAsync();
 
 				// Assert
 				httpTest.ShouldHaveCalled( "http://localhost/foobar" );

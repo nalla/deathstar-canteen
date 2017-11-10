@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Deathstar.Canteen.Commands.Abstractions
 {
 	public interface ICommand
 	{
-		string Handle();
+		Task<string> HandleAsync();
 	}
 }
