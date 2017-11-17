@@ -32,6 +32,9 @@ namespace Deathstar.Canteen
 				case "next":
 					return new NextCommand( commandRequest.Arguments, MongoClient );
 
+				case "search":
+					return new SearchCommand( commandRequest.Arguments, MongoClient );
+
 				case "add":
 					return new AddCommand( commandRequest.Arguments, MongoClient );
 
