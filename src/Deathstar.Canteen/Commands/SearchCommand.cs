@@ -11,7 +11,7 @@ namespace Deathstar.Canteen.Commands
 {
 	public class SearchCommand : Command
 	{
-		private Regex Regex { get; } = new Regex( @"\w[\w\s]+", RegexOptions.Compiled );
+		private Regex Regex { get; } = new Regex( @"\w[\w\s]*", RegexOptions.Compiled );
 
 		public SearchCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
 
