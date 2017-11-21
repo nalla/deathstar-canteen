@@ -16,6 +16,7 @@ namespace Deathstar.Canteen.Commands
 			"tomorrow",
 			"dayaftertomorrow",
 			"next",
+			"search",
 			"add",
 			"clear",
 			"import",
@@ -50,6 +51,12 @@ namespace Deathstar.Canteen.Commands
 						+ Environment.NewLine
 						+ Environment.NewLine
 						+ "Example: `next 5`";
+
+				case "search":
+					return "The *search* command will query future meals and displays the found menus."
+						+ Environment.NewLine
+						+ Environment.NewLine
+						+ "Example: `search Foobar`";
 
 				case "add":
 					return "The *add* command can be used to add something to the menu."

@@ -76,6 +76,19 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public void TheCommandFactoryShouldConstrucSearchCommandWhenSearchCommandNameIsProvided()
+		{
+			// Arrange
+			var factory = new CommandFactory( MongoHelper.Client );
+
+			// Act
+			ICommand command = factory.GetCommand( new CommandRequest( "search" ) );
+
+			// Assert
+			Assert.IsType<SearchCommand>( command );
+		}
+
+		[Fact]
 		public void TheCommandFactoryShouldConstructDayAfterTomorrowCommandWhenDayAfterTomorrowCommandNameIsProvided()
 		{
 			// Arrange

@@ -114,6 +114,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *tomorrow*{Environment.NewLine}"
 				+ $"  *dayaftertomorrow*{Environment.NewLine}"
 				+ $"  *next*{Environment.NewLine}"
+				+ $"  *search*{Environment.NewLine}"
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
 				+ $"  *import*{Environment.NewLine}"
@@ -127,6 +128,20 @@ namespace Deathstar.Canteen.Tests.Units
 
 			// Assert
 			Assert.Equal( generalHelpText, response );
+		}
+
+		[Fact]
+		public async Task TheHandleMethodWithSearchCommandNameShouldReturnDetailedHelpMessage()
+		{
+			// Arrange
+			var command = new HelpCommand( "search", MongoHelper.Client );
+
+			// Act
+			string response = await command.HandleAsync();
+
+			// Assert
+			Assert.Equal( $"The *search* command will query future meals and displays the found menus.{Environment.NewLine}{Environment.NewLine}Example: `search Foobar`",
+				response );
 		}
 
 		[Fact]
@@ -178,6 +193,7 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *tomorrow*{Environment.NewLine}"
 				+ $"  *dayaftertomorrow*{Environment.NewLine}"
 				+ $"  *next*{Environment.NewLine}"
+				+ $"  *search*{Environment.NewLine}"
 				+ $"  *add*{Environment.NewLine}"
 				+ $"  *clear*{Environment.NewLine}"
 				+ $"  *import*{Environment.NewLine}"
