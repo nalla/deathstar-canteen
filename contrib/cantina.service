@@ -1,0 +1,14 @@
+[Unit]
+Description=Deathstar Cantina
+Wants=network.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/dotnet Deathstar.Canteen.dll
+WorkingDirectory=/var/cantina
+User=cantina
+Group=cantina
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
