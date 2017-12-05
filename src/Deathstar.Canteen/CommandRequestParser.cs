@@ -2,7 +2,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Slackbot;
 
-namespace Deathstar.Canteen {
+namespace Deathstar.Canteen
+{
 	public class CommandRequestParser
 	{
 		private Regex Regex { get; } = new Regex( "(?:<@[A-Z0-9]+>\\s|)(\\w+)\\s?(.*)", RegexOptions.Compiled );

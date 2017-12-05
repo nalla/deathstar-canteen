@@ -1,4 +1,5 @@
-namespace Deathstar.Canteen {
+namespace Deathstar.Canteen
+{
 	public class CommandRequest
 	{
 		public CommandRequest( string name, string arguments = "" )
