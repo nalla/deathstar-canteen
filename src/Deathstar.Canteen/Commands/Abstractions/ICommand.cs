@@ -1,9 +1,10 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Deathstar.Canteen.Commands.Abstractions
 {
 	public interface ICommand
 	{
-		Task<string> HandleAsync();
+		Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken);
 	}
 }

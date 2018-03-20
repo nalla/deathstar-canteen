@@ -1,15 +1,32 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
-using MongoDB.Driver;
+using Deathstar.Canteen.Persistence;
+using Deathstar.Canteen.Slack;
 
 namespace Deathstar.Canteen.Commands
 {
-	public class TomorrowCommand : DateCommand
+	public class TomorrowCommand : ICommand
 	{
-		public TomorrowCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
+		private readonly IMenuCollection menuCollection;
+		private readonly ISlackbot slackbot;
 
-		protected override DateTime Date { get; } = DateTime.Today.AddDays( 1 );
+		public TomorrowCommand(IMenuCollection menuCollection, ISlackbot slackbot)
+		{
+			this.menuCollection = menuCollection;
+			this.slackbot = slackbot;
+		}
 
-		protected override string Description { get; } = "Tomorrow";
+		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
+		{
+			DateTime date = DateTime.Today.AddDays(1);
+			Menu menu = await menuCollection.SingleOrDefaultAsync(x => x.Date == date.ToString("yyyyMMdd"), cancellationToken);
+			string response = menu == null
+				? "I don't know which meals are being served tomorrow!"
+				: $"Tomorrow is the *{date:dd.MM.yyyy}* and the meals are:{Environment.NewLine}{menu}";
+
+			slackbot.SendMessage(message.Channel, response);
+		}
 	}
 }

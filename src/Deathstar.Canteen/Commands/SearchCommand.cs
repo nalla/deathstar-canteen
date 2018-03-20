@@ -1,43 +1,65 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
+using Deathstar.Canteen.Slack;
 using MongoDB.Driver;
 
 namespace Deathstar.Canteen.Commands
 {
-	public class SearchCommand : Command
+	public class SearchCommand : ICommand
 	{
-		private Regex Regex { get; } = new Regex( @"\w[\w\s]*", RegexOptions.Compiled );
+		private readonly IMenuCollection menuCollection;
+		private readonly Regex regex = new Regex(@"\w[\w\s]*", RegexOptions.Compiled);
+		private readonly ISlackbot slackbot;
 
-		public SearchCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
-
-		public override async Task<string> HandleAsync()
+		public SearchCommand(IMenuCollection menuCollection, ISlackbot slackbot)
 		{
-			if( !Regex.IsMatch( Arguments ?? string.Empty ) )
-				return "You need to provide some valid input.";
+			this.menuCollection = menuCollection;
+			this.slackbot = slackbot;
+		}
 
-			IAsyncCursor<Menu> cursor = await MongoCollection.FindAsync( $"{{Meals: {{ $regex: '.*{Arguments}.*' }}, Date: {{ $gte: '{DateTime.Today:yyyyMMdd}' }} }}" );
-			List<Menu> menus = await cursor.ToListAsync();
-
-			if( menus == null || menus.Count == 0 )
-				return "I found nothing.";
-
-			if( menus.Count > 10 )
-				return "I found more than 10 menus. Please be more precise.";
-
-			string response = string.Empty;
-
-			foreach( Menu menu in menus )
+		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
+		{
+			if (!regex.IsMatch(message.Arguments ?? string.Empty))
 			{
-				var date = DateTime.ParseExact( menu.Date, "yyyyMMdd", CultureInfo.InvariantCulture );
-				response += $"On *{date:dd.MM.yyyy}* the meals are:{Environment.NewLine}{menu}{Environment.NewLine}{Environment.NewLine}";
+				slackbot.SendMessage(message.Channel, "You need to provide some valid input.");
+
+				return;
 			}
 
-			return response.Trim();
+			FilterDefinition<Menu> filter = $"{{Meals: {{ $regex: '.*{message.Arguments}.*' }}, Date: {{ $gte: '{DateTime.Today:yyyyMMdd}' }} }}";
+			IEnumerable<Menu> menus = await menuCollection.ToListAsync(filter, cancellationToken) ?? new List<Menu>();
+
+			if (menus.Any())
+			{
+				if (menus.Count() <= 10)
+				{
+					var sb = new StringBuilder();
+
+					foreach (Menu menu in menus)
+					{
+						DateTime date = DateTime.ParseExact(menu.Date, "yyyyMMdd", CultureInfo.InvariantCulture);
+						sb.Append($"On *{date:dd.MM.yyyy}* the meals are:{Environment.NewLine}{menu}{Environment.NewLine}{Environment.NewLine}");
+					}
+
+					slackbot.SendMessage(message.Channel, sb.ToString().Trim());
+				}
+				else
+				{
+					slackbot.SendMessage(message.Channel, "I found more than 10 menus. Please be more precise.");
+				}
+			}
+			else
+			{
+				slackbot.SendMessage(message.Channel, "I found nothing.");
+			}
 		}
 	}
 }

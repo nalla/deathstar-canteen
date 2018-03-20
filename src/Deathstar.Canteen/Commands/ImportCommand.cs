@@ -1,55 +1,68 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
+using Deathstar.Canteen.Slack;
 using Flurl;
 using Flurl.Http;
-using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 
 namespace Deathstar.Canteen.Commands
 {
-	public class ImportCommand : Command
+	public class ImportCommand : ICommand
 	{
-		private Regex Regex { get; } = new Regex( "^\\d{8}$", RegexOptions.Compiled );
+		private readonly IMenuCollection menuCollection;
+		private readonly Regex regex = new Regex("^\\d{8}$", RegexOptions.Compiled);
+		private readonly ISlackbot slackbot;
+		private readonly ILogger logger;
 
-		public ImportCommand( string arguments, IMongoClient mongoClient ) : base( arguments, mongoClient ) { }
-
-		public override async Task<string> HandleAsync()
+		public ImportCommand(IMenuCollection menuCollection, ISlackbot slackbot, ILogger<ImportCommand> logger)
 		{
-			Log( $"Trying to import from url {Arguments}" );
+			this.menuCollection = menuCollection;
+			this.slackbot = slackbot;
+			this.logger = logger;
+		}
 
-			var url = new Url( ( Arguments ?? "" ).TrimStart( '<' ).TrimEnd( '>' ) );
+		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
+		{
+			var url = new Url((message.Arguments ?? string.Empty).TrimStart('<').TrimEnd('>'));
 
-			if( !url.IsValid() )
-				return "You need to provide a well formed url.";
+			if (!url.IsValid())
+			{
+				slackbot.SendMessage(message.Channel, "You need to provide a well formed url.");
 
-			Menu[] menus;
+				return;
+			}
 
 			try
 			{
-				menus = await url.GetJsonAsync<Menu[]>();
-			}
-			catch( FlurlHttpException )
-			{
-				return "I got an error when downloading the url you provided.";
-			}
+				Menu[] menus = await url.GetJsonAsync<Menu[]>(cancellationToken);
 
-			int i = 0;
+				var i = 0;
 
-			foreach( Menu menu in menus )
-			{
-				if( Regex.IsMatch( menu.Date ?? "" ) &&
-					menu.Meals?.Length > 0 &&
-					menu.Meals.All( x => !string.IsNullOrWhiteSpace( x ) ) &&
-					await MongoCollection.CountAsync( x => x.Date == menu.Date ) == 0 )
+				foreach (Menu menu in menus)
 				{
-					await MongoCollection.InsertOneAsync( menu );
-					i++;
+					// ReSharper disable once InvertIf
+					if (regex.IsMatch(menu.Date ?? string.Empty) &&
+						menu.Meals?.Length > 0 &&
+						menu.Meals.All(x => !string.IsNullOrWhiteSpace(x)) &&
+						await menuCollection.CountAsync(x => x.Date == menu.Date, cancellationToken) == 0)
+					{
+						await menuCollection.InsertOneAsync(menu, cancellationToken);
+						i++;
+					}
 				}
-			}
 
-			return $"I imported {i} menus.";
+				slackbot.SendMessage(message.Channel, $"I imported {i} menus.");
+			}
+			catch (Exception e)
+			{
+				logger.LogError(e, e.Message);
+				slackbot.SendMessage(message.Channel, "I got an error while downloading the url you provided.");
+			}
 		}
 	}
 }

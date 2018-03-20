@@ -1,7 +1,10 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
-using Deathstar.Canteen.Tests.Helpers;
+using Deathstar.Canteen.Slack;
+using Deathstar.Canteen.Tests.Mocks;
+using NSubstitute;
 using Xunit;
 
 namespace Deathstar.Canteen.Tests.Units
@@ -9,106 +12,126 @@ namespace Deathstar.Canteen.Tests.Units
 	public class HelpCommandTests
 	{
 		[Theory]
-		[InlineData( "help" )]
-		[InlineData( "HELP" )]
-		[InlineData( "hELp" )]
-		public async Task TheHandleMethodShouldNotCareAboutCaseSensitivity( string commandName )
+		[InlineData("help")]
+		[InlineData("HELP")]
+		[InlineData("hELp")]
+		public async Task TheHandleMethodShouldNotCareAboutCaseSensitivityAsync(string commandName)
 		{
 			// Arrange
-			var command = new HelpCommand( commandName, MongoHelper.Client );
+			const string response = "The *help* command will return a list of supported commands.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage(commandName, string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *help* command will return a list of supported commands.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithAddCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithAddCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "add", MongoHelper.Client );
+			string response = $"The *add* command can be used to add something to the menu.{Environment.NewLine}{Environment.NewLine}Example: `add 01012017 Foobar`";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("add", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( $"The *add* command can be used to add something to the menu.{Environment.NewLine}{Environment.NewLine}Example: `add 01012017 Foobar`", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithClearCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithClearCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "clear", MongoHelper.Client );
+			string response = $"The *clear* command can be used to clear the menu on a given date.{Environment.NewLine}{Environment.NewLine}Example: `clear 01012017`";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("clear", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( $"The *clear* command can be used to clear the menu on a given date.{Environment.NewLine}{Environment.NewLine}Example: `clear 01012017`", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithDayAfterTomorrowCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithDayAfterTomorrowCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "dayaftertomorrow", MongoHelper.Client );
+			const string response = "The *dayaftertomorrow* command will return a list of the day after tomorrow's meals.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("dayaftertomorrow", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *dayaftertomorrow* command will return a list of the day after tomorrow's meals.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithHelpCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithHelpCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "help", MongoHelper.Client );
+			const string response = "The *help* command will return a list of supported commands.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("help", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *help* command will return a list of supported commands.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithImportCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithImportCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "import", MongoHelper.Client );
+			string response = "The *import* command can be used to import a json based list of menus." +
+				$"{Environment.NewLine}{Environment.NewLine}Example: `import https://some.url/endpoint`";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("import", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal(
-				$"The *import* command can be used to import a json based list of menus.{Environment.NewLine}{Environment.NewLine}Example: `import https://some.url/endpoint`",
-				response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithNextCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithNextCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "next", MongoHelper.Client );
+			string response = $"The *next* command will return a list of menus of the next days.{Environment.NewLine}{Environment.NewLine}Example: `next 5`";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("next", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( $"The *next* command will return a list of menus of the next days.{Environment.NewLine}{Environment.NewLine}Example: `next 5`", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithNoCommandNameShouldReturnGeneralHelpMessage()
+		public async Task TheHandleMethodWithNoCommandNameShouldReturnGeneralHelpMessageAsync()
 		{
 			// Arrange
-			string generalHelpText = $"The following commands are available:{Environment.NewLine}"
+			string response = $"The following commands are available:{Environment.NewLine}"
 				+ $"  *help*{Environment.NewLine}"
 				+ $"  *today*{Environment.NewLine}"
 				+ $"  *tomorrow*{Environment.NewLine}"
@@ -121,73 +144,86 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *stats*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
-			var command = new HelpCommand( null, MongoHelper.Client );
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage(null, string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( generalHelpText, response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithSearchCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithSearchCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "search", MongoHelper.Client );
+			string response = $"The *search* command will query future meals and displays the found menus.{Environment.NewLine}{Environment.NewLine}Example: `search Foobar`";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("search", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( $"The *search* command will query future meals and displays the found menus.{Environment.NewLine}{Environment.NewLine}Example: `search Foobar`",
-				response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithStatsCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithStatsCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "stats", MongoHelper.Client );
+			var response = "The *stats* command will display internal statistics of the canteen.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("stats", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *stats* command will display internal statistics of the canteen.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithTodayCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithTodayCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "today", MongoHelper.Client );
+			const string response = "The *today* command will return a list of today's meals.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("today", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *today* command will return a list of today's meals.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithTomorrowCommandNameShouldReturnDetailedHelpMessage()
+		public async Task TheHandleMethodWithTomorrowCommandNameShouldReturnDetailedHelpMessageAsync()
 		{
 			// Arrange
-			var command = new HelpCommand( "tomorrow", MongoHelper.Client );
+			var response = "The *tomorrow* command will return a list of tomorrow's meals.";
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("tomorrow", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "The *tomorrow* command will return a list of tomorrow's meals.", response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 
 		[Fact]
-		public async Task TheHandleMethodWithUnknownCommandNameShouldReturnGeneralHelpMessage()
+		public async Task TheHandleMethodWithUnknownCommandNameShouldReturnGeneralHelpMessageAsync()
 		{
 			// Arrange
-			string generalHelpText = $"The following commands are available:{Environment.NewLine}"
+			string response = $"The following commands are available:{Environment.NewLine}"
 				+ $"  *help*{Environment.NewLine}"
 				+ $"  *today*{Environment.NewLine}"
 				+ $"  *tomorrow*{Environment.NewLine}"
@@ -200,13 +236,15 @@ namespace Deathstar.Canteen.Tests.Units
 				+ $"  *stats*{Environment.NewLine}"
 				+ Environment.NewLine
 				+ "Use *help command* for more information about each command.";
-			var command = new HelpCommand( "unkwnown", MongoHelper.Client );
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new HelpCommand(slackbot);
+			var commandMessage = new FakeCommandMessage("unkwnown", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( generalHelpText, response );
+			slackbot.Received().SendMessage(string.Empty, response);
 		}
 	}
 }

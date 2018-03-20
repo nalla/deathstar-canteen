@@ -7,7 +7,7 @@ DEPLOY_PATH=/var/cantina
 echo "Building latest version.."
 cd $APP_PATH
 git fetch && git reset --hard origin/master
-dotnet publish
+dotnet publish -c Release
 
 echo "Closing cantina.."
 sudo systemctl stop cantina.service

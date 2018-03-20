@@ -1,68 +1,72 @@
 using System;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
-using Deathstar.Canteen.Tests.Helpers;
-using MongoDB.Driver;
+using Deathstar.Canteen.Slack;
+using Deathstar.Canteen.Tests.Mocks;
+using NSubstitute;
 using Xunit;
 
 namespace Deathstar.Canteen.Tests.Units
 {
 	public class ClearCommandTests
 	{
-		public ClearCommandTests() => MongoHelper.Clear();
+		[Fact]
+		public async Task TheHandleMethodShouldClearExistingMenuAsync()
+		{
+			// Arrange
+			var slackbot = Substitute.For<ISlackbot>();
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var command = new ClearCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage($"{DateTime.Today:ddMMyyyy}", string.Empty);
+
+			menuCollection.DeleteOneAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(1);
+
+			// Act
+			await command.HandleAsync(commandMessage, CancellationToken.None);
+
+			// Assert
+			slackbot.Received().SendMessage(string.Empty, $"I cleared the menu on *{DateTime.Today:dd.MM.yyyy}*.");
+		}
+
+		[Fact]
+		public async Task TheHandleMethodShouldReturnNoticeWhenNothingWasClearedAsync()
+		{
+			// Arrange
+			var slackbot = Substitute.For<ISlackbot>();
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var command = new ClearCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage($"{DateTime.Today:dd.MM.yyyy}", string.Empty);
+
+			// Act
+			await command.HandleAsync(commandMessage, CancellationToken.None);
+
+			// Assert
+			slackbot.Received().SendMessage(string.Empty, $"There is no menu on *{DateTime.Today:dd.MM.yyyy}*!");
+		}
 
 		[Theory]
-		[InlineData( null )]
-		[InlineData( "" )]
-		[InlineData( "0101201" )]
-		[InlineData( "01.01.201" )]
-		[InlineData( "abc" )]
-		[InlineData( " abc" )]
-		public async Task TheHandleMethoudShouldExpectValidInput( string arguments )
+		[InlineData(null)]
+		[InlineData("")]
+		[InlineData("0101201")]
+		[InlineData("01.01.201")]
+		[InlineData("abc")]
+		[InlineData(" abc")]
+		public async Task TheHandleMethoudShouldExpectValidInputAsync(string arguments)
 		{
 			// Arrange
-			var command = new ClearCommand( arguments, MongoHelper.Client );
+			var slackbot = Substitute.For<ISlackbot>();
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var command = new ClearCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage(arguments, string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "You need to provide some valid input.", response );
-		}
-
-		[Fact]
-		public async Task TheHandleMethodShouldClearExistingMenu()
-		{
-			// Arrange
-			var menu = new Menu
-			{
-				Date = DateTime.Today.ToString( "yyyyMMdd" ),
-				Meals = new[] { "Foo" }
-			};
-			MongoHelper.Collection.InsertOne( menu );
-			var command = new ClearCommand( $"{DateTime.Today:ddMMyyyy}", MongoHelper.Client );
-
-			// Act
-			string response = await command.HandleAsync();
-
-			// Assert
-			Assert.Equal( $"I cleared the menu on *{DateTime.Today:dd.MM.yyyy}*.", response );
-			menu = MongoHelper.Collection.Find( x => x.Date == DateTime.Today.ToString( "yyyyMMdd" ) ).SingleOrDefault();
-			Assert.Null( menu );
-		}
-
-		[Fact]
-		public async Task TheHandleMethodShouldReturnNoticeWhenNothingWasCleared()
-		{
-			// Arrange
-			var command = new ClearCommand( $"{DateTime.Today:dd.MM.yyyy}", MongoHelper.Client );
-
-			// Act
-			string response = await command.HandleAsync();
-
-			// Assert
-			Assert.Equal( $"There is no menu on *{DateTime.Today:dd.MM.yyyy}*!", response );
+			slackbot.Received().SendMessage(string.Empty, "You need to provide some valid input.");
 		}
 	}
 }

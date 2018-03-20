@@ -1,13 +1,5 @@
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode
 .vs
-
-/tools/*
-!/tools/packages.config
-/artifacts
-
 [bB]in
 [oO]bj
+docker-compose.prod.yml

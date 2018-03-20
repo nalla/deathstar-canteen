@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+
+  deathstar-canteen:
+    build: ./src/Deathstar.Canteen
+    ports:
+      - '5100:80'
+    depends_on:
+      - deathstar-database
+    restart: unless-stopped
+
+  deathstar-database:
+    image: mongo:3.6.8
+    volumes:
+      - canteen-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  canteen-data:

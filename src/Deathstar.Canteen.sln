@@ -6,6 +6,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deathstar.Canteen", "Deaths
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deathstar.Canteen.Tests", "Deathstar.Canteen.Tests\Deathstar.Canteen.Tests.csproj", "{800785F4-B15A-4FDC-9E3D-CDAF1FEC0B2A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Additional Files", "Additional Files", "{C9F65C42-EF9B-4F4D-9F92-4B48A9542A0B}"
+	ProjectSection(SolutionItems) = preProject
+		Deathstar.Canteen\Dockerfile = Deathstar.Canteen\Dockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

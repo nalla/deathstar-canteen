@@ -1,227 +1,275 @@
+using System;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
-using Deathstar.Canteen.Tests.Helpers;
+using Deathstar.Canteen.Slack;
+using Deathstar.Canteen.Tests.Mocks;
 using Flurl.Http.Testing;
-using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 
 namespace Deathstar.Canteen.Tests.Units
 {
 	public class ImportCommandTests
 	{
-		public ImportCommandTests() => MongoHelper.Clear();
-
-		[Theory]
-		[InlineData( null )]
-		[InlineData( "" )]
-		[InlineData( "foobar" )]
-		[InlineData( "1234" )]
-		[InlineData( ":/foo/bar" )]
-		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidUrl( string arguments )
-		{
-			// Arrange
-			var command = new ImportCommand( arguments, MongoHelper.Client );
-
-			// Act
-			string response = await command.HandleAsync();
-
-			// Assert
-			Assert.Equal( "You need to provide a well formed url.", response );
-		}
-
 		[Fact]
-		public async Task TheHandleMethodShouldCheckDateFormat()
+		public async Task TheHandleMethodShouldAcceptWellFormedUrlsFromSlackAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var importData = new[]
-				{
-					new { date = "foo", meals = new[] { "foo" } }
-				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var importData = new[] { new { date = "20010101", meals = new[] { "foo", "bar" } } };
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("<https://api.myjson.com/bins/1dekrb>", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 0 menus.", response );
+				httpTest.ShouldHaveCalled("https://api.myjson.com/bins/1dekrb");
+				slackbot.Received().SendMessage(string.Empty, "I imported 1 menus.");
+				await menuCollection.Received().InsertOneAsync(
+					Arg.Is<Menu>(
+						x =>
+							x.Date == "20010101" &&
+							x.Meals[0] == "foo" &&
+							x.Meals[1] == "bar"),
+					CancellationToken.None);
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldCheckThatMealsAreValid()
+		public async Task TheHandleMethodShouldCheckDateFormatAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var importData = new[]
-				{
-					new { date = "20010101", meals = new[] { "foo", " " } }
-				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var importData = new[] { new { date = "foo", meals = new[] { "foo" } } };
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 0 menus.", response );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 0 menus.");
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldCheckThatMealsExists()
+		public async Task TheHandleMethodShouldCheckThatMealsAreValidAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var importData = new[]
-				{
-					new { date = "20010101", meals = new[] { "" } }
-				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var importData = new[] { new { date = "20010101", meals = new[] { "foo", " " } } };
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 0 menus.", response );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 0 menus.");
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldInsertMenuIntoDatabase()
+		public async Task TheHandleMethodShouldCheckThatMealsExistsAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var importData = new[]
-				{
-					new { date = "20010101", meals = new[] { "foo", "bar" } }
-				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var importData = new[] { new { date = "20010101", meals = new[] { string.Empty } } };
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 1 menus.", response );
-				Menu menu = MongoHelper.Collection.Find( x => x.Date == "20010101" ).Single();
-				Assert.Contains( "foo", menu.Meals );
-				Assert.Contains( "bar", menu.Meals );
-				Assert.Equal( 2, menu.Meals.Length );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 0 menus.");
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldAcceptWellFormedUrlsFromSlack()
+		public async Task TheHandleMethodShouldInsertMenuIntoDatabaseAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var importData = new[]
-				{
-					new { date = "20010101", meals = new[] { "foo", "bar" } }
-				};
-				var command = new ImportCommand( "<https://api.myjson.com/bins/1dekrb>", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var importData = new[] { new { date = "20010101", meals = new[] { "foo", "bar" } } };
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "https://api.myjson.com/bins/1dekrb" );
-				Assert.Equal( "I imported 1 menus.", response );
-				Menu menu = MongoHelper.Collection.Find( x => x.Date == "20010101" ).Single();
-				Assert.Contains( "foo", menu.Meals );
-				Assert.Contains( "bar", menu.Meals );
-				Assert.Equal( 2, menu.Meals.Length );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 1 menus.");
+				await menuCollection.Received().InsertOneAsync(
+					Arg.Is<Menu>(
+						x =>
+							x.Date == "20010101" &&
+							x.Meals[0] == "foo" &&
+							x.Meals[1] == "bar"),
+					CancellationToken.None);
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldInsertMenuOnlyOnceIntoDatabase()
+		public async Task TheHandleMethodShouldInsertMenuOnlyOnceIntoDatabaseAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
 				var importData = new[]
 				{
 					new { date = "20010101", meals = new[] { "foo", "bar" } },
-					new { date = "20010101", meals = new[] { "bar", "foo" } }
+					new { date = "20010101", meals = new[] { "bar", "foo" } },
 				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
+				menuCollection.CountAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(0, 1);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 1 menus.", response );
-				Menu menu = MongoHelper.Collection.Find( x => x.Date == "20010101" ).Single();
-				Assert.Contains( "foo", menu.Meals );
-				Assert.Contains( "bar", menu.Meals );
-				Assert.Equal( 2, menu.Meals.Length );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 1 menus.");
+				await menuCollection.Received().InsertOneAsync(
+					Arg.Is<Menu>(
+						x =>
+							x.Date == "20010101" &&
+							x.Meals[0] == "foo" &&
+							x.Meals[1] == "bar"),
+					CancellationToken.None);
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldInsertMultipleMenusIntoDatabase()
+		public async Task TheHandleMethodShouldInsertMultipleMenusIntoDatabaseAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
 				var importData = new[]
 				{
 					new { date = "20010101", meals = new[] { "foo", "bar" } },
-					new { date = "20010102", meals = new[] { "bar", "foo" } }
+					new { date = "20010102", meals = new[] { "bar", "foo" } },
 				};
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
-				httpTest.RespondWithJson( importData );
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
+				httpTest.RespondWithJson(importData);
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I imported 2 menus.", response );
-				Menu menu1 = MongoHelper.Collection.Find( x => x.Date == "20010101" ).Single();
-				Assert.Contains( "foo", menu1.Meals );
-				Assert.Contains( "bar", menu1.Meals );
-				Assert.Equal( 2, menu1.Meals.Length );
-				Menu menu2 = MongoHelper.Collection.Find( x => x.Date == "20010102" ).Single();
-				Assert.Contains( "bar", menu2.Meals );
-				Assert.Contains( "foo", menu2.Meals );
-				Assert.Equal( 2, menu2.Meals.Length );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I imported 2 menus.");
+				await menuCollection.Received().InsertOneAsync(
+					Arg.Is<Menu>(
+						x =>
+							x.Date == "20010101" &&
+							x.Meals[0] == "foo" &&
+							x.Meals[1] == "bar"),
+					CancellationToken.None);
+				await menuCollection.Received().InsertOneAsync(
+					Arg.Is<Menu>(
+						x =>
+							x.Date == "20010102" &&
+							x.Meals[0] == "bar" &&
+							x.Meals[1] == "foo"),
+					CancellationToken.None);
 			}
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldReturnNoticeAboutDownloadError()
+		public async Task TheHandleMethodShouldReturnNoticeAboutDownloadErrorAsync()
 		{
-			using( var httpTest = new HttpTest() )
+			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var command = new ImportCommand( "http://localhost/foobar", MongoHelper.Client );
+				var menuCollection = Substitute.For<IMenuCollection>();
+				var slackbot = Substitute.For<ISlackbot>();
+				var logger = Substitute.For<ILogger<ImportCommand>>();
+				var command = new ImportCommand(menuCollection, slackbot, logger);
+				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
+
 				httpTest.RespondWith();
 
 				// Act
-				string response = await command.HandleAsync();
+				await command.HandleAsync(commandMessage, CancellationToken.None);
 
 				// Assert
-				httpTest.ShouldHaveCalled( "http://localhost/foobar" );
-				Assert.Equal( "I got an error when downloading the url you provided.", response );
+				httpTest.ShouldHaveCalled("http://localhost/foobar");
+				slackbot.Received().SendMessage(string.Empty, "I got an error while downloading the url you provided.");
 			}
+		}
+
+		[Theory]
+		[InlineData(null)]
+		[InlineData("")]
+		[InlineData("foobar")]
+		[InlineData("1234")]
+		[InlineData(":/foo/bar")]
+		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidUrlAsync(string arguments)
+		{
+			// Arrange
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var logger = Substitute.For<ILogger<ImportCommand>>();
+			var command = new ImportCommand(menuCollection, slackbot, logger);
+			var commandMessage = new FakeCommandMessage(arguments, string.Empty);
+
+			// Act
+			await command.HandleAsync(commandMessage, CancellationToken.None);
+
+			// Assert
+			slackbot.Received().SendMessage(string.Empty, "You need to provide a well formed url.");
 		}
 	}
 }

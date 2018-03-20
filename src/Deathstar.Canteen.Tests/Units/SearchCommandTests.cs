@@ -1,127 +1,116 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
 using Deathstar.Canteen.Persistence;
-using Deathstar.Canteen.Tests.Helpers;
+using Deathstar.Canteen.Slack;
+using Deathstar.Canteen.Tests.Mocks;
+using MongoDB.Driver;
+using NSubstitute;
 using Xunit;
 
 namespace Deathstar.Canteen.Tests.Units
 {
 	public class SearchCommandTests
 	{
-		public SearchCommandTests() => MongoHelper.Clear();
-
 		[Fact]
-		public async Task TheHandleMethodShouldOnlyReturnFromToday()
+		public async Task TheHandleMethodShouldOnlyReturnMenusAsync()
 		{
 			// Arrange
-			MongoHelper.Collection.InsertMany( new[]
-			{
-				new Menu
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new SearchCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage("Foo", string.Empty);
+
+			menuCollection.ToListAsync(Arg.Any<FilterDefinition<Menu>>(), CancellationToken.None).Returns(
+				new[]
 				{
-					Date = DateTime.Today.ToString( "yyyyMMdd" ),
-					Meals = new[] { "Foo" }
-				},
-				new Menu
-				{
-					Date = DateTime.Today.AddDays( -1 ).ToString( "yyyyMMdd" ),
-					Meals = new[] { "Foo" }
-				}
-			} );
-			var command = new SearchCommand( "Foo", MongoHelper.Client );
+					new Menu
+					{
+						Date = DateTime.Today.ToString("yyyyMMdd"),
+						Meals = new[] { "Foo" },
+					},
+				}.ToList());
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo", response );
+			slackbot.Received().SendMessage(string.Empty, $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo");
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldOnlyReturnQueriedDays()
+		public async Task TheHandleMethodShouldOnlyReturnResultsSmallerThanTenAsync()
 		{
 			// Arrange
-			MongoHelper.Collection.InsertMany( new[]
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new SearchCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage("Foo", string.Empty);
+			var menus = new List<Menu>();
+
+			for (var i = 1; i < 12; i++)
 			{
-				new Menu
-				{
-					Date = DateTime.Today.ToString( "yyyyMMdd" ),
-					Meals = new[] { "Foo" }
-				},
-				new Menu
-				{
-					Date = DateTime.Today.AddDays( 1 ).ToString( "yyyyMMdd" ),
-					Meals = new[] { "Bar" }
-				}
-			} );
-			var command = new SearchCommand( "Foo", MongoHelper.Client );
-
-			// Act
-			string response = await command.HandleAsync();
-
-			// Assert
-			Assert.Equal( $"On *{DateTime.Today:dd.MM.yyyy}* the meals are:{Environment.NewLine}1. Foo", response );
-		}
-
-		[Fact]
-		public async Task TheHandleMethodShouldOnlyReturnResultsSmallerThanTen()
-		{
-			// Arrange
-			for( int i = 1; i < 12; i++ )
-			{
-				MongoHelper.Collection.InsertOne( new Menu
-				{
-					Date = DateTime.Today.AddDays( i ).ToString( "yyyyMMdd" ),
-					Meals = new[] { "Foo" }
-				} );
+				menus.Add(new Menu { Date = DateTime.Today.AddDays(i).ToString("yyyyMMdd"), Meals = new[] { "Foo" } });
 			}
 
-			var command = new SearchCommand( "Foo", MongoHelper.Client );
+			menuCollection.ToListAsync(Arg.Any<FilterDefinition<Menu>>(), CancellationToken.None).Returns(menus);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "I found more than 10 menus. Please be more precise.", response );
+			slackbot.Received().SendMessage(string.Empty, "I found more than 10 menus. Please be more precise.");
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidCommandArguments()
+		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidCommandArgumentsAsync()
 		{
 			// Arrange
-			var command = new SearchCommand( "", MongoHelper.Client );
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new SearchCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage(string.Empty, string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "You need to provide some valid input.", response );
+			slackbot.Received().SendMessage(string.Empty, "You need to provide some valid input.");
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldReturnNoticeAboutMissingCommandArguments()
+		public async Task TheHandleMethodShouldReturnNoticeAboutMissingCommandArgumentsAsync()
 		{
 			// Arrange
-			var command = new SearchCommand( null, MongoHelper.Client );
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new SearchCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage(null, string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "You need to provide some valid input.", response );
+			slackbot.Received().SendMessage(string.Empty, "You need to provide some valid input.");
 		}
 
 		[Fact]
-		public async Task TheHandleMethodShouldReturnNoticeWhenNoDataWasFound()
+		public async Task TheHandleMethodShouldReturnNoticeWhenNoDataWasFoundAsync()
 		{
 			// Arrange
-			var command = new SearchCommand( "foo", MongoHelper.Client );
+			var menuCollection = Substitute.For<IMenuCollection>();
+			var slackbot = Substitute.For<ISlackbot>();
+			var command = new SearchCommand(menuCollection, slackbot);
+			var commandMessage = new FakeCommandMessage("foo", string.Empty);
 
 			// Act
-			string response = await command.HandleAsync();
+			await command.HandleAsync(commandMessage, CancellationToken.None);
 
 			// Assert
-			Assert.Equal( "I found nothing.", response );
+			slackbot.Received().SendMessage(string.Empty, "I found nothing.");
 		}
 	}
 }

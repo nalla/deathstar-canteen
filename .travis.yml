@@ -1,8 +1,14 @@
-language: csharp
-dotnet: 2.0.0
+sudo: required
 services:
-  - mongodb
-before_script:
-  - sleep 15
+  - docker
+
+env:
+  COMPOSE_VERSION: 1.23.2
+
+before_install:
+  - curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
 script:
-  - ./build.sh
+  - docker-compose build
