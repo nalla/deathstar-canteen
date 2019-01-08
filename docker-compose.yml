@@ -6,6 +6,8 @@ services:
     build: ./src/Deathstar.Canteen
     ports:
       - '5100:80'
+    environment:
+      - connectionString=mongodb://deathstar-database
     depends_on:
       - deathstar-database
     restart: unless-stopped
