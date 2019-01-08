@@ -8,25 +8,31 @@ Jeff Vader's famous canteen. Located somewhere in the center of the deathstar. T
 
 ## Environment
 
-Just add an `appsettings.json` file to the `Deathstar.Canteen` project providing the following information.
+Just add an `docker-compose.prod.yml` file to the project providing the following information.
 
-~~~json
-{
-  "token": "slack api token",
-  "username": "botname"
-}
+~~~yml
+version: '3'
+
+services:
+
+  deathstar-canteen:
+    environment:
+      - Slackbot__Token=slacktoken
+      - Slackbot__Username=botusername
 ~~~
 
 With this data Jeff has everything that he needs to run the canteen.
 
-## Test
+## Docker
+
+Just run the following command to setup the deathstar canteen.
 
 ~~~bash
-> ./build
+$> docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ~~~
 
-## Run
+You can redeploy the deathstar canteen after that with the following command.
 
 ~~~bash
-> ./build -target run
+$> ./redeploy.sh
 ~~~
