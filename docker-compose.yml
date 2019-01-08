@@ -3,9 +3,7 @@ version: '3'
 services:
 
   deathstar-canteen:
-    build: ./src/Deathstar.Canteen
-    ports:
-      - '5100:80'
+    build: ./src
     environment:
       - connectionString=mongodb://deathstar-database
     depends_on:
