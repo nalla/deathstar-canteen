@@ -36,6 +36,8 @@ namespace Deathstar.Canteen.Commands
 			sb.AppendLine();
 			sb.AppendLine("*Database*");
 			sb.AppendLine($"Saved menus: {await menuCollection.CountAsync(_ => true, cancellationToken)}");
+			sb.AppendLine();
+			sb.AppendLine("Code: https://github.com/nalla/deathstar-canteen");
 
 			slackbot.SendMessage(message.Channel, sb.ToString());
 		}
