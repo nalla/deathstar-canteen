@@ -25,6 +25,13 @@ namespace Deathstar.Canteen.Commands
 			this.slackbot = slackbot;
 		}
 
+		public string HelpText { get; } = "The *search* command will query future meals and displays the found menus."
+			+ Environment.NewLine
+			+ Environment.NewLine
+			+ "Example: `search Foobar`";
+
+		public string Name { get; } = "search";
+
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			if (!regex.IsMatch(message.Arguments ?? string.Empty))

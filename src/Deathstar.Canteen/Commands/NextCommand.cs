@@ -25,6 +25,13 @@ namespace Deathstar.Canteen.Commands
 			this.slackbot = slackbot;
 		}
 
+		public string HelpText { get; } = "The *next* command will return a list of menus of the next days."
+			+ Environment.NewLine
+			+ Environment.NewLine
+			+ "Example: `next 5`";
+
+		public string Name { get; } = "next";
+
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			Match match = regex.Match(message.Arguments ?? string.Empty);

@@ -18,6 +18,10 @@ namespace Deathstar.Canteen.Commands
 			this.slackbot = slackbot;
 		}
 
+		public string HelpText { get; } = "The default command that tries to chat.";
+
+		public string Name { get; } = "chat";
+
 		public Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			foreach (ChatResponse chatResponse in configuration.GetSection("chat").Get<ChatResponse[]>())

@@ -20,6 +20,10 @@ namespace Deathstar.Canteen.Commands
 			this.slackbot = slackbot;
 		}
 
+		public string HelpText { get; } = "The *stats* command will display internal statistics of the canteen.";
+
+		public string Name { get; } = "stats";
+
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			var sb = new StringBuilder();

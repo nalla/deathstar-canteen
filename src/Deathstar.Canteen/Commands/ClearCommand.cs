@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,13 @@ namespace Deathstar.Canteen.Commands
 			this.menuCollection = menuCollection;
 			this.slackbot = slackbot;
 		}
+
+		public string HelpText { get; } = "The *clear* command can be used to clear the menu on a given date."
+			+ Environment.NewLine
+			+ Environment.NewLine
+			+ "Example: `clear 01012017`";
+
+		public string Name { get; } = "clear";
 
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{

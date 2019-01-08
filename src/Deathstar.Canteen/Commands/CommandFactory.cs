@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Deathstar.Canteen.Commands.Abstractions;
@@ -10,6 +11,8 @@ namespace Deathstar.Canteen.Commands
 
 		public CommandFactory(IEnumerable<ICommand> commands) => this.commands = commands;
 
-		public ICommand GetCommand(string name) => commands?.FirstOrDefault(x => x.GetType().Name.ToLowerInvariant().StartsWith(name?.ToLowerInvariant() ?? string.Empty));
+		public ICommand GetCommand(string name) => commands.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+		public IEnumerable<ICommand> GetSupportedCommands() => commands;
 	}
 }

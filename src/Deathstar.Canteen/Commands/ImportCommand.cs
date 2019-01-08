@@ -26,6 +26,13 @@ namespace Deathstar.Canteen.Commands
 			this.logger = logger;
 		}
 
+		public string HelpText { get; } = "The *import* command can be used to import a json based list of menus."
+			+ Environment.NewLine
+			+ Environment.NewLine
+			+ "Example: `import https://some.url/endpoint`";
+
+		public string Name { get; } = "import";
+
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			var url = new Url((message.Arguments ?? string.Empty).TrimStart('<').TrimEnd('>'));

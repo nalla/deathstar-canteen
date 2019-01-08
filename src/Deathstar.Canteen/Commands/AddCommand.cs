@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,6 +21,13 @@ namespace Deathstar.Canteen.Commands
 			this.menuCollection = menuCollection;
 			this.slackbot = slackbot;
 		}
+
+		public string HelpText { get; } = "The *add* command can be used to add something to the menu."
+			+ Environment.NewLine
+			+ Environment.NewLine
+			+ "Example: `add 01012017 Foobar`";
+
+		public string Name { get; } = "add";
 
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{

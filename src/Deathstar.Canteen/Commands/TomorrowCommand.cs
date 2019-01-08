@@ -18,6 +18,10 @@ namespace Deathstar.Canteen.Commands
 			this.slackbot = slackbot;
 		}
 
+		public string HelpText { get; } = "The *tomorrow* command will return a list of tomorrow's meals.";
+
+		public string Name { get; } = "tomorrow";
+
 		public async Task HandleAsync(ICommandMessage message, CancellationToken cancellationToken)
 		{
 			DateTime date = DateTime.Today.AddDays(1);
