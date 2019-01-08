@@ -48,7 +48,18 @@ namespace Deathstar.Canteen
 
 					return mongoCollection;
 				});
+			services.AddSingleton(
+				x =>
+				{
+					var mongoClient = x.GetService<IMongoClient>();
+					IMongoDatabase mongoDatabase = mongoClient.GetDatabase("canteen");
+					IMongoCollection<ChatResponse> mongoCollection = mongoDatabase.GetCollection<ChatResponse>("chatResponses");
+					mongoCollection.Indexes.CreateOne(new CreateIndexModel<ChatResponse>(Builders<ChatResponse>.IndexKeys.Ascending(y => y.Regex)));
+
+					return mongoCollection;
+				});
 			services.AddTransient<IMenuCollection, MenuCollection>();
+			services.AddTransient<IChatResponseCollection, ChatResponseCollection>();
 
 			services.AddSingleton<ISlackbot, Slack.Slackbot>();
 

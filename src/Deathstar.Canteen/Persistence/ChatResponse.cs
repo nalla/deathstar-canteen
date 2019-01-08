@@ -1,12 +1,14 @@
-namespace Deathstar.Canteen
+using MongoDB.Bson;
+
+namespace Deathstar.Canteen.Persistence
 {
-	// ReSharper disable once ClassNeverInstantiated.Global
 	public class ChatResponse
 	{
 		// ReSharper disable once UnusedAutoPropertyAccessor.Global
+		public ObjectId Id { get; set; }
+
 		public string Regex { get; set; }
 
-		// ReSharper disable once UnusedAutoPropertyAccessor.Global
 		public string Response { get; set; }
 	}
 }
