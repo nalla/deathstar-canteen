@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,10 @@ namespace Deathstar.Canteen.Commands
 			Process process = Process.GetCurrentProcess();
 			TimeSpan uptime = DateTime.Now - process.StartTime;
 
-			sb.AppendLine("*Runtime*");
+			sb.AppendLine("*AspNetCore Runtime*");
+			sb.AppendLine($"Version: {GetNetCoreVersion()}");
+			sb.AppendLine();
+			sb.AppendLine("*Service*");
 			sb.AppendLine($"Private Memory: {process.PrivateMemorySize64 / 1024 / 1024} MB");
 			sb.AppendLine($"Virtual Memory: {process.VirtualMemorySize64 / 1024 / 1024} MB");
 			sb.AppendLine($"Working Memory: {process.WorkingSet64 / 1024 / 1024} MB");
@@ -41,9 +45,19 @@ namespace Deathstar.Canteen.Commands
 			sb.AppendLine("*Database*");
 			sb.AppendLine($"Saved menus: {await menuCollection.CountAsync(_ => true, cancellationToken)}");
 			sb.AppendLine();
-			sb.AppendLine("Code: https://github.com/nalla/deathstar-canteen");
+			sb.AppendLine("*Contribution*");
+			sb.AppendLine("https://github.com/nalla/deathstar-canteen");
 
 			slackbot.SendMessage(message.Channel, sb.ToString());
+		}
+
+		private static string GetNetCoreVersion()
+		{
+			var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
+			var assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+			int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
+
+			return netCoreAppIndex > 0 && netCoreAppIndex < assemblyPath.Length - 2 ? assemblyPath[netCoreAppIndex + 1] : null;
 		}
 	}
 }
