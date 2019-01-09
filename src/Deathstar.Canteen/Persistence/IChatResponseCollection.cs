@@ -10,6 +10,6 @@ namespace Deathstar.Canteen.Persistence
 
 		Task<IEnumerable<ChatResponse>> GetAsync(CancellationToken cancellationToken);
 
-		Task RemoveAsync(string regex);
+		Task<bool> RemoveAsync(string regex);
 	}
 }

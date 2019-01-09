@@ -23,6 +23,6 @@ namespace Deathstar.Canteen.Persistence
 		public async Task<IEnumerable<ChatResponse>> GetAsync(CancellationToken cancellationToken) =>
 			(await mongoCollection.FindAsync(FilterDefinition<ChatResponse>.Empty, cancellationToken: cancellationToken)).ToEnumerable();
 
-		public async Task RemoveAsync(string regex) => await mongoCollection.DeleteOneAsync(x => x.Regex == regex);
+		public async Task<bool> RemoveAsync(string regex) => (await mongoCollection.DeleteOneAsync(x => x.Regex == regex)).DeletedCount == 1;
 	}
 }

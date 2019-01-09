@@ -11,7 +11,7 @@ namespace Deathstar.Canteen.Commands
 	public class ChatCommand : ICommand
 	{
 		private readonly IChatResponseCollection chatResponseCollection;
-		private readonly Regex regex = new Regex(@"(add|remove)\s(\S+)\s(\S.*)", RegexOptions.Compiled);
+		private readonly Regex regex = new Regex(@"(add|remove)\s(\S+)\s?(\S?.*)", RegexOptions.Compiled);
 		private readonly ISlackbot slackbot;
 
 		public ChatCommand(IChatResponseCollection chatResponseCollection, ISlackbot slackbot)
@@ -51,11 +51,15 @@ namespace Deathstar.Canteen.Commands
 				case "add":
 
 					await chatResponseCollection.AddAsync(match.Groups[2].Value, match.Groups[3].Value);
+					slackbot.SendMessage(message.Channel, "I added your chat response to my AI.");
 
 					break;
 
 				case "remove":
-					await chatResponseCollection.RemoveAsync(match.Groups[2].Value);
+					if (await chatResponseCollection.RemoveAsync(match.Groups[2].Value))
+					{
+						slackbot.SendMessage(message.Channel, "I just forgot your response. Can't remember a thing.");
+					}
 
 					break;
 			}
