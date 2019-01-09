@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Slack;
 using Deathstar.Canteen.Tests.Mocks;
@@ -13,13 +14,16 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class ClearCommandTests
 	{
+		private readonly IMenuCollection menuCollection = Substitute.For<IMenuCollection>();
+		private readonly ISlackbot slackbot = Substitute.For<ISlackbot>();
+		private readonly ICommand command;
+
+		public ClearCommandTests() => command = new ClearCommand(menuCollection, slackbot);
+
 		[Fact]
 		public async Task TheHandleMethodShouldClearExistingMenuAsync()
 		{
 			// Arrange
-			var slackbot = Substitute.For<ISlackbot>();
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var command = new ClearCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:ddMMyyyy}", string.Empty);
 
 			menuCollection.DeleteOneAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(1);
@@ -35,9 +39,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnNoticeWhenNothingWasClearedAsync()
 		{
 			// Arrange
-			var slackbot = Substitute.For<ISlackbot>();
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var command = new ClearCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:dd.MM.yyyy}", string.Empty);
 
 			// Act
@@ -57,9 +58,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethoudShouldExpectValidInputAsync(string arguments)
 		{
 			// Arrange
-			var slackbot = Substitute.For<ISlackbot>();
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var command = new ClearCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage(arguments, string.Empty);
 
 			// Act

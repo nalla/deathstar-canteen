@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Slack;
 using Deathstar.Canteen.Tests.Mocks;
@@ -13,13 +14,16 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class TomorrowCommandTests
 	{
+		private readonly IMenuCollection menuCollection = Substitute.For<IMenuCollection>();
+		private readonly ISlackbot slackbot = Substitute.For<ISlackbot>();
+		private readonly ICommand command;
+
+		public TomorrowCommandTests() => command = new TomorrowCommand(menuCollection, slackbot);
+
 		[Fact]
 		public async Task TheHandleMethodShouldReturnErrorNoticeWhenNoMenuisPresentAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new TomorrowCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage(null, string.Empty);
 
 			// Act
@@ -34,9 +38,6 @@ namespace Deathstar.Canteen.Tests.Units
 		{
 			// Arrange
 			var menu = new Menu { Date = DateTime.Today.AddDays(1).ToString("yyyyMMdd"), Meals = new[] { "Foo", "Bar" } };
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new TomorrowCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage(null, string.Empty);
 
 			menuCollection.SingleOrDefaultAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(menu);

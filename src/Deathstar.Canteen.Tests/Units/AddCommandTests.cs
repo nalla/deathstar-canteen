@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Slack;
 using Deathstar.Canteen.Tests.Mocks;
@@ -14,12 +15,16 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class AddCommandTests
 	{
+		private readonly IMenuCollection menuCollection = Substitute.For<IMenuCollection>();
+		private readonly ISlackbot slackbot = Substitute.For<ISlackbot>();
+		private readonly ICommand command;
+
+		public AddCommandTests() => command = new AddCommand(menuCollection, slackbot);
+
 		[Fact]
 		public async Task TheHandleMethodShouldAddMealToExistingMenuAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-
 			menuCollection.SingleOrDefaultAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(
 				new Menu
 				{
@@ -27,8 +32,6 @@ namespace Deathstar.Canteen.Tests.Units
 					Meals = new[] { "Foo" },
 				});
 
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new AddCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:ddMMyyyy} Bar", string.Empty);
 
 			// Act
@@ -46,9 +49,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldAddMealToTodaysMenuUsingTheDotNotationAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new AddCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:dd.MM.yyyy} Foobar", string.Empty);
 
 			// Act
@@ -63,9 +63,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldAddMealToTodaysMenuUsingTheNoDotNotationAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new AddCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:ddMMyyyy} Foobar", string.Empty);
 
 			// Act
@@ -88,9 +85,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldExpectValidInputAsync(string arguments)
 		{
 			// Arrange
-			var slackbot = Substitute.For<ISlackbot>();
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var command = new AddCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage(arguments, string.Empty);
 
 			// Act
@@ -104,8 +98,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldNotAddSameMealTwiceAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-
 			menuCollection.SingleOrDefaultAsync(Arg.Any<Expression<Func<Menu, bool>>>(), CancellationToken.None).Returns(
 				new Menu
 				{
@@ -113,8 +105,6 @@ namespace Deathstar.Canteen.Tests.Units
 					Meals = new[] { "Foo" },
 				});
 
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new AddCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage($"{DateTime.Today:ddMMyyyy} Foo", string.Empty);
 
 			// Act

@@ -1,4 +1,5 @@
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Slackbot;
 using Xunit;
 
@@ -6,11 +7,12 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class CommandMessageParserTests
 	{
+		private readonly ICommandMessageParser commandRequestParser = new CommandMessageParser();
+
 		[Fact]
 		public void TheParseMethodShouldOptionallyIgnoreMessagePrefixIfUsernameIsMentioned()
 		{
 			// Arrange
-			var commandRequestParser = new CommandMessageParser();
 			var message = new OnMessageArgs
 			{
 				MentionedUsers = new[] { "foobar" },
@@ -30,7 +32,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public void TheParseMethodShouldParseAguments()
 		{
 			// Arrange
-			var commandRequestParser = new CommandMessageParser();
 			var message = new OnMessageArgs
 			{
 				MentionedUsers = new[] { "foobar" },
@@ -50,7 +51,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public void TheParseMethodShouldReturnAComandRequest()
 		{
 			// Arrange
-			var commandRequestParser = new CommandMessageParser();
 			var message = new OnMessageArgs
 			{
 				MentionedUsers = new[] { "foobar" },

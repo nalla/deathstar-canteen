@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Slack;
 using Deathstar.Canteen.Tests.Mocks;
@@ -15,6 +16,13 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class ImportCommandTests
 	{
+		private readonly IMenuCollection menuCollection = Substitute.For<IMenuCollection>();
+		private readonly ISlackbot slackbot = Substitute.For<ISlackbot>();
+		private readonly ILogger<ImportCommand> logger = Substitute.For<ILogger<ImportCommand>>();
+		private readonly ICommand command;
+
+		public ImportCommandTests() => command = new ImportCommand(menuCollection, slackbot, logger);
+
 		[Fact]
 		public async Task TheHandleMethodShouldAcceptWellFormedUrlsFromSlackAsync()
 		{
@@ -22,10 +30,6 @@ namespace Deathstar.Canteen.Tests.Units
 			{
 				// Arrange
 				var importData = new[] { new { date = "20010101", meals = new[] { "foo", "bar" } } };
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("<https://api.myjson.com/bins/1dekrb>", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -53,10 +57,6 @@ namespace Deathstar.Canteen.Tests.Units
 			{
 				// Arrange
 				var importData = new[] { new { date = "foo", meals = new[] { "foo" } } };
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -77,10 +77,6 @@ namespace Deathstar.Canteen.Tests.Units
 			{
 				// Arrange
 				var importData = new[] { new { date = "20010101", meals = new[] { "foo", " " } } };
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -101,10 +97,6 @@ namespace Deathstar.Canteen.Tests.Units
 			{
 				// Arrange
 				var importData = new[] { new { date = "20010101", meals = new[] { string.Empty } } };
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -125,10 +117,6 @@ namespace Deathstar.Canteen.Tests.Units
 			{
 				// Arrange
 				var importData = new[] { new { date = "20010101", meals = new[] { "foo", "bar" } } };
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -160,10 +148,6 @@ namespace Deathstar.Canteen.Tests.Units
 					new { date = "20010101", meals = new[] { "foo", "bar" } },
 					new { date = "20010101", meals = new[] { "bar", "foo" } },
 				};
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -196,10 +180,6 @@ namespace Deathstar.Canteen.Tests.Units
 					new { date = "20010101", meals = new[] { "foo", "bar" } },
 					new { date = "20010102", meals = new[] { "bar", "foo" } },
 				};
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWithJson(importData);
@@ -233,10 +213,6 @@ namespace Deathstar.Canteen.Tests.Units
 			using (var httpTest = new HttpTest())
 			{
 				// Arrange
-				var menuCollection = Substitute.For<IMenuCollection>();
-				var slackbot = Substitute.For<ISlackbot>();
-				var logger = Substitute.For<ILogger<ImportCommand>>();
-				var command = new ImportCommand(menuCollection, slackbot, logger);
 				var commandMessage = new FakeCommandMessage("http://localhost/foobar", string.Empty);
 
 				httpTest.RespondWith();
@@ -259,10 +235,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidUrlAsync(string arguments)
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var logger = Substitute.For<ILogger<ImportCommand>>();
-			var command = new ImportCommand(menuCollection, slackbot, logger);
 			var commandMessage = new FakeCommandMessage(arguments, string.Empty);
 
 			// Act

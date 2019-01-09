@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Deathstar.Canteen.Commands;
+using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Slack;
 using Deathstar.Canteen.Tests.Mocks;
@@ -14,13 +15,16 @@ namespace Deathstar.Canteen.Tests.Units
 {
 	public class NextCommandTests
 	{
+		private readonly IMenuCollection menuCollection = Substitute.For<IMenuCollection>();
+		private readonly ISlackbot slackbot = Substitute.For<ISlackbot>();
+		private readonly ICommand command;
+
+		public NextCommandTests() => command = new NextCommand(menuCollection, slackbot);
+
 		[Fact]
 		public async Task TheHandleMethodShouldReturnAMaxiumumOfSevenDaysAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("10", string.Empty);
 
 			// Act
@@ -34,9 +38,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnAMinimumOfOneDayAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("0", string.Empty);
 
 			// Act
@@ -50,9 +51,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnMenusAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("2", string.Empty);
 
 			menuCollection.ToListAsync(Arg.Any<FilterDefinition<Menu>>(), CancellationToken.None).Returns(
@@ -85,9 +83,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnNoticeAboutInvalidCommandArgumentsAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("Foobar", string.Empty);
 
 			// Act
@@ -101,9 +96,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnNoticeAboutMissingCommandArgumentsAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage(null, string.Empty);
 
 			// Act
@@ -117,9 +109,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnNoticeWhenNoDataWasFoundAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("1", string.Empty);
 
 			// Act
@@ -133,9 +122,6 @@ namespace Deathstar.Canteen.Tests.Units
 		public async Task TheHandleMethodShouldReturnTodaysMenuAsync()
 		{
 			// Arrange
-			var menuCollection = Substitute.For<IMenuCollection>();
-			var slackbot = Substitute.For<ISlackbot>();
-			var command = new NextCommand(menuCollection, slackbot);
 			var commandMessage = new FakeCommandMessage("1", string.Empty);
 
 			menuCollection.ToListAsync(Arg.Any<FilterDefinition<Menu>>(), CancellationToken.None).Returns(
