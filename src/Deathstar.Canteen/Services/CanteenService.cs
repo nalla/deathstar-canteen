@@ -2,9 +2,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Deathstar.Canteen.Commands;
-using Deathstar.Canteen.Commands.Abstractions;
-using Deathstar.Canteen.Slack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,9 +12,7 @@ namespace Deathstar.Canteen.Services
 	// ReSharper disable once ClassNeverInstantiated.Global
 	public class CanteenService : BackgroundService
 	{
-		private readonly ICommandFactory commandFactory;
-
-		private readonly ICommandMessageParser commandMessageParser;
+		private readonly ICommandDispatcher commandDispatcher;
 
 		private readonly IConfiguration configuration;
 
@@ -27,14 +22,12 @@ namespace Deathstar.Canteen.Services
 
 		public CanteenService(
 			IConfiguration configuration,
-			ICommandMessageParser commandMessageParser,
-			ICommandFactory commandFactory,
+			ICommandDispatcher commandDispatcher,
 			ISlackbot slackbot,
 			ILogger<CanteenService> logger)
 		{
 			this.configuration = configuration;
-			this.commandMessageParser = commandMessageParser;
-			this.commandFactory = commandFactory;
+			this.commandDispatcher = commandDispatcher;
 			this.slackbot = slackbot;
 			this.logger = logger;
 		}
@@ -47,7 +40,7 @@ namespace Deathstar.Canteen.Services
 				{
 					if (message.MentionedUsers.Any(user => user == configuration["Slackbot:Username"]))
 					{
-						await Handle(message, stoppingToken);
+						await HandleAsync(message, stoppingToken);
 					}
 				}
 				catch (Exception e)
@@ -59,21 +52,6 @@ namespace Deathstar.Canteen.Services
 			await Task.Delay(-1, stoppingToken);
 		}
 
-		private async Task Handle(OnMessageArgs message, CancellationToken stoppingToken)
-		{
-			ICommandMessage commandMessage = commandMessageParser.Parse(message);
-			ICommand command = commandFactory.GetCommand(commandMessage?.Name);
-
-			if (command == null)
-			{
-				commandMessage = new CommandMessage("chat", message.Channel, message.Text);
-				command = commandFactory.GetCommand(commandMessage.Name);
-			}
-
-			if (command != null)
-			{
-				await command.HandleAsync(commandMessage, stoppingToken);
-			}
-		}
+		private Task HandleAsync(OnMessageArgs message, CancellationToken stoppingToken) => commandDispatcher.DispatchAsync(message, stoppingToken);
 	}
 }

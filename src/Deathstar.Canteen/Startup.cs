@@ -1,8 +1,5 @@
-using Deathstar.Canteen.Commands;
-using Deathstar.Canteen.Commands.Abstractions;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Services;
-using Deathstar.Canteen.Slack;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,25 +55,24 @@ namespace Deathstar.Canteen
 
 					return mongoCollection;
 				});
-			services.AddTransient<IMenuCollection, MenuCollection>();
-			services.AddTransient<IChatResponseCollection, ChatResponseCollection>();
+			services.AddTransient<IMenuRepository, MenuRepository>();
+			services.AddTransient<IChatResponseRepository, ChatResponseRepository>();
 
-			services.AddSingleton<ISlackbot, Slack.Slackbot>();
+			services.AddSingleton<ISlackbot, Services.Slackbot>();
 
-			services.AddTransient<ICommandMessageParser, CommandMessageParser>();
-			services.AddTransient<ICommandFactory, CommandFactory>();
+			services.AddTransient<ICommandDispatcher, CommandDispatcher>();
 
-			services.AddTransient<ICommand, HelpCommand>();
-			services.AddTransient<ICommand, AddCommand>();
-			services.AddTransient<ICommand, ClearCommand>();
-			services.AddTransient<ICommand, DayAfterTomorrowCommand>();
-			services.AddTransient<ICommand, TomorrowCommand>();
-			services.AddTransient<ICommand, TodayCommand>();
-			services.AddTransient<ICommand, ImportCommand>();
-			services.AddTransient<ICommand, StatsCommand>();
-			services.AddTransient<ICommand, SearchCommand>();
-			services.AddTransient<ICommand, NextCommand>();
-			services.AddTransient<ICommand, ChatCommand>();
+			services.AddTransient<ICommandHandler, HelpCommandHandler>();
+			services.AddTransient<ICommandHandler, AddCommandHandler>();
+			services.AddTransient<ICommandHandler, ClearCommandHandler>();
+			services.AddTransient<ICommandHandler, DayAfterTomorrowCommandHandler>();
+			services.AddTransient<ICommandHandler, TomorrowCommandHandler>();
+			services.AddTransient<ICommandHandler, TodayCommandHandler>();
+			services.AddTransient<ICommandHandler, ImportCommandHandler>();
+			services.AddTransient<ICommandHandler, StatsCommandHandler>();
+			services.AddTransient<ICommandHandler, SearchCommandHandler>();
+			services.AddTransient<ICommandHandler, NextCommandHandler>();
+			services.AddTransient<ICommandHandler, ChatCommandHandler>();
 
 			services.AddHostedService<CanteenService>();
 		}
