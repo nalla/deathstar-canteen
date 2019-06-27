@@ -41,6 +41,18 @@ namespace Deathstar.Canteen.Tests.Units
 		}
 
 		[Fact]
+		public async Task TheHandleMethodShouldNotAddMealToTodaysMenuAsync()
+		{
+			// Act
+			await commandHandler.HandleAsync($"{DateTime.Today:dd.MM.yyyy}", string.Empty, default);
+
+			// Assert
+			await menuRepository.DidNotReceive().InsertOneAsync(Arg.Is<Menu>(x => x.Meals.Contains("Foobar")));
+			slackbot.Received().SendMessage(string.Empty, "You need to provide some valid input.");
+			Assert.Single(slackbot.ReceivedCalls());
+		}
+
+		[Fact]
 		public async Task TheHandleMethodShouldAddMealToTodaysMenuUsingTheDotNotationAsync()
 		{
 			// Act

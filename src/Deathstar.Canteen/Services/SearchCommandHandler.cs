@@ -32,39 +32,37 @@ namespace Deathstar.Canteen.Services
 
 		public async Task HandleAsync(string arguments, string channel, CancellationToken cancellationToken)
 		{
-			if (!regex.IsMatch(arguments ?? string.Empty))
+			if (regex.IsMatch(arguments ?? string.Empty))
 			{
-				slackbot.SendMessage(channel, "You need to provide some valid input.");
+				FilterDefinition<Menu> filter = $"{{Meals: {{ $regex: '.*{arguments}.*' }}, Date: {{ $gte: '{DateTime.Today:yyyyMMdd}' }} }}";
+				IEnumerable<Menu> menus = await menuRepository.ToListAsync(filter, cancellationToken) ?? new List<Menu>();
 
-				return;
-			}
-
-			FilterDefinition<Menu> filter = $"{{Meals: {{ $regex: '.*{arguments}.*' }}, Date: {{ $gte: '{DateTime.Today:yyyyMMdd}' }} }}";
-			IEnumerable<Menu> menus = await menuRepository.ToListAsync(filter, cancellationToken) ?? new List<Menu>();
-
-			if (menus.Any())
-			{
-				if (menus.Count() <= 10)
+				if (menus.Any())
 				{
-					var sb = new StringBuilder();
-
-					foreach (Menu menu in menus)
-					{
-						DateTime date = DateTime.ParseExact(menu.Date, "yyyyMMdd", CultureInfo.InvariantCulture);
-						sb.Append($"On *{date:dd.MM.yyyy}* the meals are:{Environment.NewLine}{menu}{Environment.NewLine}{Environment.NewLine}");
-					}
-
-					slackbot.SendMessage(channel, sb.ToString().Trim());
+					slackbot.SendMessage(channel, menus.Count() <= 10 ? GetMessage(menus).Trim() : "I found more than 10 menus. Please be more precise.");
 				}
 				else
 				{
-					slackbot.SendMessage(channel, "I found more than 10 menus. Please be more precise.");
+					slackbot.SendMessage(channel, "I found nothing.");
 				}
 			}
 			else
 			{
-				slackbot.SendMessage(channel, "I found nothing.");
+				slackbot.SendMessage(channel, "You need to provide some valid input.");
 			}
+		}
+
+		private static string GetMessage(IEnumerable<Menu> menus)
+		{
+			var sb = new StringBuilder();
+
+			foreach (Menu menu in menus)
+			{
+				DateTime date = DateTime.ParseExact(menu.Date, "yyyyMMdd", CultureInfo.InvariantCulture);
+				sb.Append($"On *{date:dd.MM.yyyy}* the meals are:{Environment.NewLine}{menu}{Environment.NewLine}{Environment.NewLine}");
+			}
+
+			return sb.ToString();
 		}
 	}
 }

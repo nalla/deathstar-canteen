@@ -29,7 +29,27 @@ namespace Deathstar.Canteen.Services
 		{
 			Match match = regex.Match(arguments ?? string.Empty);
 
-			if (!match.Success)
+			if (match.Success)
+			{
+				switch (match.Groups[1].Value)
+				{
+					case "add":
+
+						await chatResponseRepository.AddAsync(match.Groups[2].Value, match.Groups[3].Value);
+						slackbot.SendMessage(channel, "I added your chat response to my AI.");
+
+						break;
+
+					case "remove":
+						if (await chatResponseRepository.RemoveAsync(match.Groups[2].Value))
+						{
+							slackbot.SendMessage(channel, "I just forgot your response. Can't remember a thing.");
+						}
+
+						break;
+				}
+			}
+			else
 			{
 				foreach (ChatResponse chatResponse in await chatResponseRepository.GetAsync(cancellationToken))
 				{
@@ -40,26 +60,6 @@ namespace Deathstar.Canteen.Services
 						break;
 					}
 				}
-
-				return;
-			}
-
-			switch (match.Groups[1].Value)
-			{
-				case "add":
-
-					await chatResponseRepository.AddAsync(match.Groups[2].Value, match.Groups[3].Value);
-					slackbot.SendMessage(channel, "I added your chat response to my AI.");
-
-					break;
-
-				case "remove":
-					if (await chatResponseRepository.RemoveAsync(match.Groups[2].Value))
-					{
-						slackbot.SendMessage(channel, "I just forgot your response. Can't remember a thing.");
-					}
-
-					break;
 			}
 		}
 	}

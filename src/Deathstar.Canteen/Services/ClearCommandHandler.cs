@@ -28,11 +28,7 @@ namespace Deathstar.Canteen.Services
 		{
 			Match match = regex.Match(arguments ?? string.Empty);
 
-			if (!match.Success)
-			{
-				slackbot.SendMessage(channel, "You need to provide some valid input.");
-			}
-
+			if (match.Success)
 			{
 				string date = $"{match.Groups[3].Value}{match.Groups[2].Value}{match.Groups[1]}";
 				string formattedDate = $"{match.Groups[1].Value}.{match.Groups[2].Value}.{match.Groups[3].Value}";
@@ -44,6 +40,10 @@ namespace Deathstar.Canteen.Services
 				}
 
 				slackbot.SendMessage(channel, response);
+			}
+			else
+			{
+				slackbot.SendMessage(channel, "You need to provide some valid input.");
 			}
 		}
 	}

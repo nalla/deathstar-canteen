@@ -31,41 +31,43 @@ namespace Deathstar.Canteen.Services
 		{
 			Match match = regex.Match(arguments ?? string.Empty);
 
-			if (!match.Success)
+			if (match.Success)
 			{
-				slackbot.SendMessage(channel, "You need to provide some valid input.");
-			}
+				string date = $"{match.Groups[3].Value}{match.Groups[2].Value}{match.Groups[1]}";
+				string formattedDate = $"{match.Groups[1].Value}.{match.Groups[2].Value}.{match.Groups[3].Value}";
+				string meal = match.Groups[4].Value;
+				Menu menu = await menuRepository.SingleOrDefaultAsync(x => x.Date == date, cancellationToken);
 
-			string date = $"{match.Groups[3].Value}{match.Groups[2].Value}{match.Groups[1]}";
-			string formattedDate = $"{match.Groups[1].Value}.{match.Groups[2].Value}.{match.Groups[3].Value}";
-			string meal = match.Groups[4].Value;
-			Menu menu = await menuRepository.SingleOrDefaultAsync(x => x.Date == date, cancellationToken);
-
-			if (menu != null)
-			{
-				if (menu.Meals.Contains(meal))
+				if (menu != null)
 				{
-					slackbot.SendMessage(channel, $"_{meal}_ is already on the menu on *{formattedDate}*!");
+					if (menu.Meals.Contains(meal))
+					{
+						slackbot.SendMessage(channel, $"_{meal}_ is already on the menu on *{formattedDate}*!");
+					}
+					else
+					{
+						List<string> list = menu.Meals.ToList();
+
+						list.Add(meal);
+						menu.Meals = list.ToArray();
+						await menuRepository.ReplaceOneAsync(x => x.Id == menu.Id, menu, cancellationToken);
+						slackbot.SendMessage(channel, $"I added _{meal}_ to the menu on *{formattedDate}*.");
+					}
 				}
 				else
 				{
-					List<string> list = menu.Meals.ToList();
-
-					list.Add(meal);
-					menu.Meals = list.ToArray();
-					await menuRepository.ReplaceOneAsync(x => x.Id == menu.Id, menu, cancellationToken);
+					menu = new Menu
+					{
+						Date = date,
+						Meals = new[] { meal },
+					};
+					await menuRepository.InsertOneAsync(menu, cancellationToken);
 					slackbot.SendMessage(channel, $"I added _{meal}_ to the menu on *{formattedDate}*.");
 				}
 			}
 			else
 			{
-				menu = new Menu
-				{
-					Date = date,
-					Meals = new[] { meal },
-				};
-				await menuRepository.InsertOneAsync(menu, cancellationToken);
-				slackbot.SendMessage(channel, $"I added _{meal}_ to the menu on *{formattedDate}*.");
+				slackbot.SendMessage(channel, "You need to provide some valid input.");
 			}
 		}
 	}
