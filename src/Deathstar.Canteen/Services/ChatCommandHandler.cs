@@ -9,7 +9,7 @@ namespace Deathstar.Canteen.Services
 	public class ChatCommandHandler : ICommandHandler
 	{
 		private readonly IChatResponseRepository chatResponseRepository;
-		private readonly Regex regex = new Regex(@"(add|remove)\s(\S+)\s?(\S?.*)", RegexOptions.Compiled);
+		private readonly Regex regex = new Regex(@"^(add|remove)\s(\S+)\s?(\S?.*)", RegexOptions.Compiled);
 		private readonly ISlackbot slackbot;
 
 		public ChatCommandHandler(IChatResponseRepository chatResponseRepository, ISlackbot slackbot)
