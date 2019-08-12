@@ -72,6 +72,7 @@ namespace Deathstar.Canteen
 			services.AddTransient<ICommandHandler, StatsCommandHandler>();
 			services.AddTransient<ICommandHandler, SearchCommandHandler>();
 			services.AddTransient<ICommandHandler, NextCommandHandler>();
+			services.AddTransient<ICommandHandler, WeekCommandHandler>();
 			services.AddTransient<ICommandHandler, ChatCommandHandler>();
 
 			services.AddHostedService<CanteenService>();
