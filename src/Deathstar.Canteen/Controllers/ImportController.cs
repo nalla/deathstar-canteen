@@ -11,6 +11,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Deathstar.Canteen.Controllers
@@ -19,6 +20,7 @@ namespace Deathstar.Canteen.Controllers
 	[Route("imports")]
 	public class ImportController : Controller
 	{
+		private readonly IConfiguration configuration;
 		private readonly ILogger logger;
 		private readonly IMenuParser menuParser;
 		private readonly IMenuRepository menuRepository;
@@ -26,15 +28,18 @@ namespace Deathstar.Canteen.Controllers
 		public ImportController(
 			ILogger<ImportController> logger,
 			IMenuParser menuParser,
-			IMenuRepository menuRepository)
+			IMenuRepository menuRepository,
+			IConfiguration configuration)
 		{
 			this.logger = logger;
 			this.menuParser = menuParser;
 			this.menuRepository = menuRepository;
+			this.configuration = configuration;
 		}
 
 		[HttpGet]
-		public IActionResult Get() => Ok("Please POST the pdf file with content type \"multipart/form-data\" to this endpoint. Use \"pdf\" as the key inside the form data.");
+		public IActionResult Get() => Ok(
+			"Please POST the pdf file with content type \"multipart/form-data\" to this endpoint. Use \"pdf\" as the key for the file and \"apiKey\" for the api key inside the form data.");
 
 		[HttpPost]
 		[Consumes("multipart/form-data")]
@@ -42,6 +47,20 @@ namespace Deathstar.Canteen.Controllers
 		public async Task<IActionResult> PostAsync([FromForm] FormData formData, CancellationToken cancellationToken)
 		{
 			var importResult = new ImportResult();
+
+			if (formData == null)
+			{
+				importResult.Error = "Form data is missing.";
+
+				return BadRequest(importResult);
+			}
+
+			if (formData.ApiKey?.Equals(configuration["Import:ApiKey"]) != true)
+			{
+				importResult.Error = "Api Key is missing or invalid.";
+
+				return BadRequest(importResult);
+			}
 
 			try
 			{
