@@ -1,15 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deathstar.Canteen", "Deathstar.Canteen\Deathstar.Canteen.csproj", "{DD57707A-AE6E-4FE2-A93D-9C08C51BD5BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deathstar.Canteen.Tests", "Deathstar.Canteen.Tests\Deathstar.Canteen.Tests.csproj", "{800785F4-B15A-4FDC-9E3D-CDAF1FEC0B2A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Additional Files", "Additional Files", "{C9F65C42-EF9B-4F4D-9F92-4B48A9542A0B}"
-	ProjectSection(SolutionItems) = preProject
-		Deathstar.Canteen\Dockerfile = Deathstar.Canteen\Dockerfile
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

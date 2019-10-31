@@ -4,6 +4,8 @@ services:
 
   deathstar-canteen:
     build: ./src
+    ports:
+      - '56789:80'
     environment:
       - connectionString=mongodb://deathstar-database
     depends_on:

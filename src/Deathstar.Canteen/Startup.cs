@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
 using Deathstar.Canteen.Persistence;
 using Deathstar.Canteen.Services;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -22,11 +25,13 @@ namespace Deathstar.Canteen
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		// ReSharper disable once UnusedMember.Global
-		public void Configure(IApplicationLifetime lifetime)
+		public void Configure(IApplicationBuilder app, IHostApplicationLifetime lifetime)
 		{
 			lifetime.ApplicationStarted.Register(() => logger.LogInformation("Application started."));
 			lifetime.ApplicationStopping.Register(() => logger.LogInformation("Application stopping.."));
 			lifetime.ApplicationStopped.Register(() => logger.LogInformation("Application stopped."));
+			app.UseRouting();
+			app.UseEndpoints(endpoints => endpoints.MapControllers());
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -75,7 +80,13 @@ namespace Deathstar.Canteen
 			services.AddTransient<ICommandHandler, WeekCommandHandler>();
 			services.AddTransient<ICommandHandler, ChatCommandHandler>();
 
+			services.AddTransient<IMenuParser, MenuParser>();
+
 			services.AddHostedService<CanteenService>();
+
+			services.AddControllers()
+				.AddJsonOptions(x => x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 		}
 	}
 }

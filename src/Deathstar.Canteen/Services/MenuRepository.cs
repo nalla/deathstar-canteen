@@ -27,6 +27,9 @@ namespace Deathstar.Canteen.Services
 		public async Task ReplaceOneAsync(Expression<Func<Menu, bool>> filter, Menu replacement, CancellationToken cancellationToken = default) =>
 			await mongoCollection.ReplaceOneAsync(filter, replacement, cancellationToken: cancellationToken);
 
+		public async Task ReplaceOrInsertAsync(Menu menu, CancellationToken cancellationToken = default) =>
+			await mongoCollection.ReplaceOneAsync(Builders<Menu>.Filter.Eq(x => x.Date, menu.Date), menu, new UpdateOptions { IsUpsert = true }, cancellationToken);
+
 		public async Task<Menu> SingleOrDefaultAsync(Expression<Func<Menu, bool>> filter, CancellationToken cancellationToken = default)
 		{
 			IAsyncCursor<Menu> cursor = await mongoCollection.FindAsync(filter, cancellationToken: cancellationToken);
