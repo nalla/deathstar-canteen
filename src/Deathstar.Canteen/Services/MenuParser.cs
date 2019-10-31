@@ -17,7 +17,7 @@ namespace Deathstar.Canteen.Services
 			foreach (string line in lines)
 			{
 				string trimmed = line.Trim();
-				if (DateTime.TryParseExact(trimmed, "dddd, d. MMMM yyyy", null, DateTimeStyles.AssumeLocal, out DateTime date))
+				if (DateTime.TryParseExact(trimmed, "dddd, d. MMMM yyyy", CultureInfo.GetCultureInfo("de-de"), DateTimeStyles.AssumeLocal, out DateTime date))
 				{
 					currentDate = date;
 
